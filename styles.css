@@ -624,3 +624,8 @@ html, body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap
   .stage-btn .s-badge { display: inline; }
   .touch-controls { bottom: 10px; padding: 0 14px; }
 }
+
+/* ===== PC: jogo ocupa a tela toda (maximo possivel mantendo 16:9) ===== */
+@media (pointer: fine) {
+  #game-shell { width: min(100vw, calc((100dvh - 100px) * 16 / 9 + 20px)); max-width: none; }
+}

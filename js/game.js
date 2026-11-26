@@ -667,6 +667,33 @@ window.Jogo.Game = (function () {
     });
   }
 
+  function enterFullscreen() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) return;
+    Promise.resolve(req.call(el))
+      .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+      .catch(() => {});
+  }
+
+  // Navegadores so permitem tela cheia apos um gesto do usuario:
+  // entra em tela cheia no primeiro clique/toque/tecla.
+  function autoFullscreenOnce() {
+    window.removeEventListener('pointerdown', autoFullscreenOnce, true);
+    window.removeEventListener('keydown', autoFullscreenOnce, true);
+    enterFullscreen();
+  }
+  window.addEventListener('pointerdown', autoFullscreenOnce, true);
+  window.addEventListener('keydown', autoFullscreenOnce, true);
+
+  // Tecla F alterna tela cheia
+  window.addEventListener('keydown', (e) => {
+    if (e.code !== 'KeyF') return;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else enterFullscreen();
+  });
+
   bindInput();
   initUI();
   requestAnimationFrame(loop);
