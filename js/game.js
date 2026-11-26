@@ -89,7 +89,8 @@ window.Jogo.Game = (function () {
         jump: 'Space',
         attack: 'KeyJ',
         shoot: 'KeyL',
-        dash: 'ShiftLeft'
+        dash: 'ShiftLeft',
+        potion: 'KeyQ'
       };
       const code = map[action];
       btn.addEventListener('touchstart', (e) => {
@@ -614,9 +615,9 @@ window.Jogo.Game = (function () {
 
   function rpgWin() {
     state = 'result';
-    document.getElementById('result-title').textContent = '🏆 Aventura Concluída!';
-    document.getElementById('result-subtitle').textContent = 'O Guardião do Cataclisma caiu e as Árvores de Arcano florescem outra vez!';
-    document.getElementById('result-stats').innerHTML = 'Obrigado por jogar o <strong>Modo RPG</strong>.<br>Novas aventuras virão com a história completa!';
+    document.getElementById('result-title').textContent = '🏆 Atos 1 e 2 Concluídos!';
+    document.getElementById('result-subtitle').textContent = 'As Árvores de Arcano e a Torre no Mar foram purificadas!';
+    document.getElementById('result-stats').innerHTML = 'Você derrotou o <strong>Guardião do Cataclisma</strong> e o <strong>Soberano das Esferas</strong>!<br>A lenda dos Didalmianos continua em breve.';
     document.getElementById('btn-next-stage').classList.add('hidden');
     screenResult.classList.remove('hidden');
   }
