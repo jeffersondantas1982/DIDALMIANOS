@@ -59,6 +59,7 @@
     <!-- Área Principal do Canvas -->
     <main id="canvas-wrap">
       <canvas id="game-canvas" width="960" height="540"></canvas>
+      <button id="btn-rpg-pause" class="icon-btn" title="Pausar (ESC)">⏸</button>
 
       <!-- Tela Inicial -->
       <div id="screen-title" class="overlay-screen">
@@ -72,6 +73,7 @@
           </p>
           <div class="menu-buttons">
             <button id="btn-play" class="btn-primary">▶ Jogar Campanha (10 Fases)</button>
+            <button id="btn-rpg" class="btn-primary btn-rpg">🗡 Modo RPG (Aventura estilo Zelda)</button>
             <button id="btn-select-stage" class="btn-secondary">🗺 Selecionar Fase</button>
             <button id="btn-fullscreen" class="btn-secondary">⛶ Tela Cheia</button>
           </div>
@@ -136,8 +138,10 @@
     <!-- Controles Touch para Mobile/Tablet (oculto em desktop grande se não usado) -->
     <div id="touch-controls" class="touch-controls">
       <div class="touch-dpad">
+        <button data-key="up" class="rpg-only">▲</button>
         <button data-key="left">◀</button>
         <button data-key="right">▶</button>
+        <button data-key="down" class="rpg-only">▼</button>
       </div>
       <div class="touch-actions">
         <button data-key="dash">🌀</button>
@@ -158,6 +162,7 @@
   <script src="js/levels.js" defer></script>
   <script src="js/renderer.js" defer></script>
   <script src="js/entities.js" defer></script>
+  <script src="js/rpg.js" defer></script>
   <script src="js/game.js" defer></script>
 </body>
 </html>

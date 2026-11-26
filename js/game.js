@@ -2,6 +2,8 @@ window.Jogo = window.Jogo || {};
 
 window.Jogo.Game = (function () {
   const { Audio, Levels, Renderer, Entities, Characters: Chars } = window.Jogo;
+  const RPG = window.Jogo.RPG;
+  let mode = 'platform'; // platform | rpg
   const { rectsOverlap, Particle, FloatingText, Projectile, Enemy, Player } = Entities;
 
   const canvas = document.getElementById('game-canvas');
@@ -64,8 +66,8 @@ window.Jogo.Game = (function () {
       keys[code] = true;
 
       if (code === 'Escape') {
-        if (state === 'playing') pauseGame();
-        else if (state === 'paused') resumeGame();
+        if (state === 'playing' || state === 'rpg') pauseGame();
+        else if (state === 'paused' || state === 'rpg-paused') resumeGame();
       }
       if (code === 'KeyM') {
         toggleMute();
@@ -80,6 +82,8 @@ window.Jogo.Game = (function () {
     document.querySelectorAll('#touch-controls button').forEach((btn) => {
       const action = btn.dataset.key;
       const map = {
+        up: 'ArrowUp',
+        down: 'ArrowDown',
         left: 'ArrowLeft',
         right: 'ArrowRight',
         jump: 'Space',
@@ -134,6 +138,7 @@ window.Jogo.Game = (function () {
   }
 
   function loadStage(num) {
+    leaveRpg();
     currentStageNum = num;
     stageData = Levels.getStage(num);
     const sv = getSaved(selectedChar);
@@ -489,6 +494,11 @@ window.Jogo.Game = (function () {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (mode === 'rpg' && state !== 'title') {
+      RPG.draw();
+      return;
+    }
+
     if (!stageData) {
       // Fundo animado leve no menu
       Renderer.drawBackground(ctx, Levels.getStage(1).theme, elapsedTime * 35, elapsedTime, canvas.width, canvas.height);
@@ -533,7 +543,9 @@ window.Jogo.Game = (function () {
     const dt = Math.min(0.05, (ts - lastFrame) / 1000 || 0.016);
     lastFrame = ts;
 
-    document.body.classList.toggle('playing', state === 'playing');
+    const inRpg = state === 'rpg';
+    document.body.classList.toggle('playing', state === 'playing' || inRpg);
+    if (inRpg) RPG.update(dt);
 
     if (state === 'title') {
       elapsedTime += dt;
@@ -545,15 +557,68 @@ window.Jogo.Game = (function () {
   }
 
   function pauseGame() {
+    if (state === 'rpg') {
+      state = 'rpg-paused';
+      RPG.setPaused(true);
+      screenPause.classList.remove('hidden');
+      return;
+    }
     if (state !== 'playing') return;
     state = 'paused';
     screenPause.classList.remove('hidden');
   }
 
   function resumeGame() {
+    if (state === 'rpg-paused') {
+      state = 'rpg';
+      RPG.setPaused(false);
+      screenPause.classList.add('hidden');
+      return;
+    }
     if (state !== 'paused') return;
     state = 'playing';
     screenPause.classList.add('hidden');
+  }
+
+  function setTouchLabels(rpg) {
+    const j = document.querySelector('#touch-controls [data-key="jump"]');
+    if (j) j.textContent = rpg ? '✋' : '▲';
+    document.getElementById('btn-restart-stage').textContent = rpg ? '↻ Recomeçar aventura' : '↻ Reiniciar Fase';
+  }
+
+  function startRpg() {
+    mode = 'rpg';
+    state = 'rpg';
+    [screenTitle, screenStages, screenPause, screenResult, document.getElementById('screen-chars')].forEach((s) => s.classList.add('hidden'));
+    hud.classList.add('hidden');
+    document.body.classList.add('rpg-mode');
+    setTouchLabels(true);
+    RPG.start(selectedChar, false);
+  }
+
+  function restartRpg() {
+    screenPause.classList.add('hidden');
+    screenResult.classList.add('hidden');
+    RPG.setPaused(false);
+    mode = 'rpg';
+    state = 'rpg';
+    RPG.restart();
+  }
+
+  function leaveRpg() {
+    if (mode === 'rpg') RPG.stop();
+    mode = 'platform';
+    document.body.classList.remove('rpg-mode');
+    setTouchLabels(false);
+  }
+
+  function rpgWin() {
+    state = 'result';
+    document.getElementById('result-title').textContent = '🏆 Aventura Concluída!';
+    document.getElementById('result-subtitle').textContent = 'O Guardião do Cataclisma caiu e as Árvores de Arcano florescem outra vez!';
+    document.getElementById('result-stats').innerHTML = 'Obrigado por jogar o <strong>Modo RPG</strong>.<br>Novas aventuras virão com a história completa!';
+    document.getElementById('btn-next-stage').classList.add('hidden');
+    screenResult.classList.remove('hidden');
   }
 
   function toggleMute() {
@@ -631,6 +696,8 @@ window.Jogo.Game = (function () {
       }
     });
     document.getElementById('btn-play').addEventListener('click', () => openChars('play'));
+    document.getElementById('btn-rpg').addEventListener('click', () => openChars('rpg'));
+    document.getElementById('btn-rpg-pause').addEventListener('click', pauseGame);
     document.getElementById('btn-select-stage').addEventListener('click', () => openChars('stages'));
     document.getElementById('btn-chars-back').addEventListener('click', () => {
       screenChars.classList.add('hidden');
@@ -639,6 +706,7 @@ window.Jogo.Game = (function () {
     document.getElementById('btn-chars-confirm').addEventListener('click', () => {
       screenChars.classList.add('hidden');
       if (pendingAction === 'play') loadStage(unlockedStage);
+      else if (pendingAction === 'rpg') startRpg();
       else openStagesMenu();
     });
     document.getElementById('btn-back-title').addEventListener('click', () => {
@@ -649,8 +717,9 @@ window.Jogo.Game = (function () {
     document.getElementById('btn-pause').addEventListener('click', pauseGame);
     document.getElementById('btn-mute').addEventListener('click', toggleMute);
     document.getElementById('btn-resume').addEventListener('click', resumeGame);
-    document.getElementById('btn-restart-stage').addEventListener('click', () => loadStage(currentStageNum));
+    document.getElementById('btn-restart-stage').addEventListener('click', () => (mode === 'rpg' ? restartRpg() : loadStage(currentStageNum)));
     document.getElementById('btn-quit-menu').addEventListener('click', () => {
+      leaveRpg();
       state = 'title';
       screenPause.classList.add('hidden');
       hud.classList.add('hidden');
@@ -658,8 +727,9 @@ window.Jogo.Game = (function () {
     });
 
     document.getElementById('btn-next-stage').addEventListener('click', () => loadStage(currentStageNum + 1));
-    document.getElementById('btn-retry-stage').addEventListener('click', () => loadStage(currentStageNum));
+    document.getElementById('btn-retry-stage').addEventListener('click', () => (mode === 'rpg' ? restartRpg() : loadStage(currentStageNum)));
     document.getElementById('btn-result-menu').addEventListener('click', () => {
+      leaveRpg();
       state = 'title';
       screenResult.classList.add('hidden');
       hud.classList.add('hidden');
@@ -694,6 +764,7 @@ window.Jogo.Game = (function () {
     else enterFullscreen();
   });
 
+  RPG.init({ ctx, isDown, isJust, Audio, Chars, onWin: rpgWin });
   bindInput();
   initUI();
   requestAnimationFrame(loop);

@@ -629,3 +629,18 @@ html, body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap
 @media (pointer: fine) {
   #game-shell { width: min(100vw, calc((100dvh - 100px) * 16 / 9 + 20px)); max-width: none; }
 }
+
+/* ===== MODO RPG ===== */
+.btn-rpg { background: linear-gradient(180deg, #a855f7, #6d28d9); border-color: #d8b4fe; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4); }
+.rpg-only { display: none; }
+#btn-rpg-pause { display: none; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; opacity: 0.85; width: 40px; height: 34px; }
+body.rpg-mode #btn-rpg-pause { display: block; }
+body.rpg-mode .rpg-only { display: block; }
+body.rpg-mode .touch-dpad {
+  display: grid; grid-template-columns: repeat(3, 62px); grid-template-areas: ". up ." "left . right" ". down ."; gap: 4px;
+}
+body.rpg-mode .touch-controls .touch-dpad button { width: 62px; height: 62px; border-radius: 50%; }
+.touch-dpad button[data-key="up"] { grid-area: up; }
+.touch-dpad button[data-key="down"] { grid-area: down; }
+.touch-dpad button[data-key="left"] { grid-area: left; }
+.touch-dpad button[data-key="right"] { grid-area: right; }
