@@ -594,3 +594,33 @@ html, body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap
   .stage-btn .s-badge { display: none; }
   .touch-controls { bottom: max(24px, env(safe-area-inset-bottom)); }
 }
+
+/* ===== Celular em pe: gira a tela via CSS para ficar sempre deitado ===== */
+@media (orientation: portrait) and (pointer: coarse) {
+  html, body { width: 100vw; height: 100dvh; overflow: hidden; }
+  #game-shell {
+    position: fixed; top: 0; left: 0;
+    width: 100dvh; height: 100vw; max-width: none;
+    transform-origin: top left;
+    transform: translateX(100vw) rotate(90deg);
+    padding: 4px; gap: 4px;
+  }
+  #canvas-wrap { width: auto; max-width: 100%; height: calc(100vw - 64px); aspect-ratio: 16 / 9; margin: 0 auto; }
+  #hud { flex-wrap: nowrap; padding: 3px 8px; gap: 6px; border-radius: 10px; border-width: 1.5px; }
+  .hud-center { order: 0; width: auto; flex-direction: column; gap: 2px; }
+  .portrait-frame { width: 40px; height: 40px; border-width: 2px; }
+  .vitals-group { min-width: 150px; gap: 2px; }
+  .hp-bar-bg { height: 15px; }
+  .hp-text { font-size: 10px; }
+  .heart-icon { font-size: 14px; }
+  .exp-bar-bg { height: 11px; }
+  .exp-text { font-size: 8px; }
+  .lv-badge { font-size: 10px; padding: 0 6px; }
+  .stage-title { font-size: 11px; }
+  .spheres-counter { font-size: 10px; padding: 0 8px; }
+  .stats-card { font-size: 10px; padding: 2px 6px; min-width: 70px; }
+  .hud-actions { flex-direction: row; }
+  .stages-grid { max-height: 190px; }
+  .stage-btn .s-badge { display: inline; }
+  .touch-controls { bottom: 10px; padding: 0 14px; }
+}
