@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nícolas, o Didalmiano — Crônicas das Árvores de Arcano</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="game-shell">
+    <!-- HUD Superior inspirado na ficha do Nícolas -->
+    <header id="hud" class="hidden">
+      <div class="hud-left">
+        <div class="portrait-frame">
+          <canvas id="portrait-canvas" width="72" height="72"></canvas>
+        </div>
+        <div class="vitals-group">
+          <div class="hp-bar-wrap">
+            <span class="heart-icon">♥</span>
+            <div class="hp-bar-bg">
+              <div id="hp-fill" class="hp-fill" style="width: 100%"></div>
+              <span id="hp-text" class="hp-text">HP: 100 / 100</span>
+            </div>
+          </div>
+          <div class="exp-row">
+            <span id="lv-badge" class="lv-badge">Lv. 1</span>
+            <div class="exp-bar-bg">
+              <div id="exp-fill" class="exp-fill" style="width: 0%"></div>
+              <span id="exp-text" class="exp-text">EXP: 0 / 100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div id="stage-title" class="stage-title">Fase 1/10 — Costa da Torre no Mar</div>
+        <div class="spheres-counter">
+          <span class="sphere-orb"></span>
+          <span id="spheres-text">Esferas: 0</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <div class="stats-card">
+          <div class="stat-line"><span class="stat-icon atq">⚔</span> ATQ: <strong id="stat-atq">15</strong></div>
+          <div class="stat-line"><span class="stat-icon def">🛡</span> DEF: <strong id="stat-def">10</strong></div>
+          <div class="stat-line"><span class="stat-icon spd">⚡</span> SPD: <strong id="stat-spd">12</strong></div>
+        </div>
+        <div class="hud-actions">
+          <button id="btn-mute" class="icon-btn" title="Som (M)">🔊</button>
+          <button id="btn-pause" class="icon-btn" title="Pausar (ESC)">⏸</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área Principal do Canvas -->
+    <main id="canvas-wrap">
+      <canvas id="game-canvas" width="960" height="540"></canvas>
+
+      <!-- Tela Inicial -->
+      <div id="screen-title" class="overlay-screen">
+        <div class="title-card">
+          <div class="lore-tag">UNIVERSO DAS ÁRVORES DE ARCANO</div>
+          <h1>DIDALMIANOS</h1>
+          <h2>Nícolas, o Pirata Armeiro &amp; Nicks, o Lanceiro das Chamas</h2>
+          <p class="lore-desc">
+            Após o Cataclisma, cada conceito fez brotar uma <strong>Árvore de Arcano</strong> e seus Guardiões.
+            Da Torre no Mar, onde esferas mágicas se concentram, surge <strong>Nícolas</strong> — travesso como um Saci-Pererê, armado com lâminas gêmeas e pistola arcana.
+          </p>
+          <div class="menu-buttons">
+            <button id="btn-play" class="btn-primary">▶ Jogar Campanha (10 Fases)</button>
+            <button id="btn-select-stage" class="btn-secondary">🗺 Selecionar Fase</button>
+          </div>
+          <div class="controls-hint">
+            <span><strong>A / D</strong> ou <strong>← / →</strong> Mover</span>
+            <span><strong>W / Espaço</strong> Pular (2x)</span>
+            <span><strong>J / Z</strong> Lâminas</span>
+            <span><strong>L / X</strong> Tiro Arcano</span>
+            <span><strong>Shift / K</strong> Redemoinho</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seleção de Personagem -->
+      <div id="screen-chars" class="overlay-screen hidden">
+        <div class="stages-card chars-card">
+          <h2>Escolha seu Didalmiano</h2>
+          <div id="chars-grid" class="chars-grid"></div>
+          <div class="menu-buttons">
+            <button id="btn-chars-confirm" class="btn-primary">Confirmar ➔</button>
+            <button id="btn-chars-back" class="btn-secondary">← Voltar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seleção de Fases -->
+      <div id="screen-stages" class="overlay-screen hidden">
+        <div class="stages-card">
+          <h2>Jornada de Nícolas — 10 Fases</h2>
+          <div id="stages-grid" class="stages-grid"></div>
+          <button id="btn-back-title" class="btn-secondary">← Voltar</button>
+        </div>
+      </div>
+
+      <!-- Pausa -->
+      <div id="screen-pause" class="overlay-screen hidden">
+        <div class="modal-card">
+          <h2>Jogo Pausado</h2>
+          <div class="menu-buttons">
+            <button id="btn-resume" class="btn-primary">▶ Continuar</button>
+            <button id="btn-restart-stage" class="btn-secondary">↻ Reiniciar Fase</button>
+            <button id="btn-quit-menu" class="btn-secondary">🏠 Menu Principal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vitória de Fase / Game Over -->
+      <div id="screen-result" class="overlay-screen hidden">
+        <div class="modal-card">
+          <h2 id="result-title">Fase Concluída!</h2>
+          <p id="result-subtitle"></p>
+          <div id="result-stats" class="result-stats"></div>
+          <div class="menu-buttons">
+            <button id="btn-next-stage" class="btn-primary">Próxima Fase ➔</button>
+            <button id="btn-retry-stage" class="btn-secondary">↻ Jogar Novamente</button>
+            <button id="btn-result-menu" class="btn-secondary">🏠 Menu Principal</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Controles Touch para Mobile/Tablet (oculto em desktop grande se não usado) -->
+    <div id="touch-controls" class="touch-controls hidden">
+      <div class="touch-dpad">
+        <button data-key="left">◀</button>
+        <button data-key="right">▶</button>
+      </div>
+      <div class="touch-actions">
+        <button data-key="dash">🌀</button>
+        <button data-key="shoot">🔫</button>
+        <button data-key="attack">⚔</button>
+        <button data-key="jump">▲</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/audio.js" defer></script>
+  <script src="js/characters.js" defer></script>
+  <script src="js/levels.js" defer></script>
+  <script src="js/renderer.js" defer></script>
+  <script src="js/entities.js" defer></script>
+  <script src="js/game.js" defer></script>
+</body>
+</html>
