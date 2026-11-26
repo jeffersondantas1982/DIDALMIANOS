@@ -787,7 +787,7 @@ window.Jogo.RPG = (function () {
     for (const s of signs) if (dist(fx, fy, s.x * T + 16, s.y * T + 16) < 30) return '[Espaço] Ler Placa';
     const boat = props.find((p) => p.kind === 'boat');
     if (boat && dist(P.x, P.y, boat.x + 20, boat.y + 12) < 56) {
-      return act === 1 ? (flags.act2Unlocked ? '[Espaço] Navegar p/ Torre no Mar (Ato 2)' : 'Barca trancada (Conclua o Ato 1)') : '[Espaço] Voltar p/ Vila (Ato 1)';
+      return act === 1 ? ((flags.act2Unlocked || flags.final) ? '[Espaço] Navegar p/ Torre no Mar (Ato 2)' : 'Barca trancada (Conclua o Ato 1)') : '[Espaço] Voltar p/ Vila (Ato 1)';
     }
     const altar = props[0];
     if (altar && dist(P.x, P.y, altar.x + 48, altar.y + 80) < 100) {
@@ -838,7 +838,7 @@ window.Jogo.RPG = (function () {
     const boat = props.find((p) => p.kind === 'boat');
     if (boat && dist(P.x, P.y, boat.x + 20, boat.y + 12) < 56) {
       if (act === 1) {
-        if (flags.act2Unlocked) {
+        if (flags.act2Unlocked || flags.final) {
           say('Barca Arcana', ['Içando velas rumo à Torre no Mar — Ato 2!'], () => {
             loadAct(2, SPAWN_ACT2);
             saveGame();
