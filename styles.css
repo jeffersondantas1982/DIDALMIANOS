@@ -566,3 +566,31 @@ html, body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap
 @media (pointer: coarse) and (max-height: 520px) {
   #canvas-wrap { height: calc(100dvh - 60px); }
 }
+
+/* ===== Celular em pe (retrato): jogavel sem precisar girar ===== */
+#rotate-hint { display: none !important; }
+@media (orientation: portrait) and (pointer: coarse) {
+  body { align-items: flex-start; }
+  #game-shell { padding: 4px; }
+  #canvas-wrap { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+  #hud { flex-wrap: wrap; justify-content: center; padding: 4px 6px; gap: 4px 8px; }
+  .hud-center { order: 3; width: 100%; flex-direction: row; justify-content: center; gap: 10px; }
+  .stage-title { font-size: 11px; }
+  .vitals-group { min-width: 140px; }
+  .portrait-frame { width: 44px; height: 44px; }
+  .lore-desc, .controls-hint, .lore-tag { display: none; }
+  .title-card, .stages-card, .modal-card { padding: 12px 14px; }
+  .title-card h1 { font-size: 26px; }
+  .title-card h2 { font-size: 12px; margin: 2px 0 8px; }
+  .menu-buttons { gap: 6px; }
+  .btn-primary, .btn-secondary { padding: 8px 12px; font-size: 13px; }
+  .chars-grid { gap: 8px; }
+  .char-card canvas { max-width: 90px; }
+  .char-card .c-desc { display: none; }
+  .char-card .c-title, .char-card .c-stats { font-size: 10px; }
+  .stages-grid { grid-template-columns: 1fr 1fr; max-height: 120px; }
+  .stage-btn { padding: 5px 7px; }
+  .stage-btn .s-name { font-size: 10px; }
+  .stage-btn .s-badge { display: none; }
+  .touch-controls { bottom: max(24px, env(safe-area-inset-bottom)); }
+}

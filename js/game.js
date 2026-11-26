@@ -534,9 +534,6 @@ window.Jogo.Game = (function () {
     lastFrame = ts;
 
     document.body.classList.toggle('playing', state === 'playing');
-    if (state === 'playing' && window.matchMedia('(orientation: portrait) and (pointer: coarse)').matches) {
-      pauseGame();
-    }
 
     if (state === 'title') {
       elapsedTime += dt;
