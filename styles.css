@@ -691,3 +691,48 @@ body.rpg-mode .touch-controls .touch-dpad button { width: 62px; height: 62px; bo
     gap: 0 !important;
   }
 }
+
+/* ===== D-PAD CIRCULAR COMPACTO COM DESLIZE ===== */
+@media (pointer: coarse) {
+  .touch-dpad {
+    pointer-events: auto !important;
+    touch-action: none;
+    position: relative;
+    background: radial-gradient(circle, rgba(234, 179, 8, 0.14) 0%, rgba(15, 23, 34, 0.62) 72%);
+    border: 2px solid rgba(234, 179, 8, 0.55);
+    border-radius: 999px;
+    padding: 6px;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+  .touch-dpad button {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 50% !important;
+    font-size: 20px;
+    border-color: rgba(234, 179, 8, 0.45);
+    background: rgba(15, 23, 34, 0.48);
+  }
+  body.rpg-mode .touch-dpad {
+    width: 146px;
+    height: 146px;
+    padding: 0;
+    display: block !important;
+  }
+  body.rpg-mode .touch-dpad button {
+    position: absolute;
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 18px;
+  }
+  body.rpg-mode .touch-dpad button[data-key="up"]    { top: 4px; left: 50%; transform: translateX(-50%); }
+  body.rpg-mode .touch-dpad button[data-key="down"]  { bottom: 4px; left: 50%; transform: translateX(-50%); }
+  body.rpg-mode .touch-dpad button[data-key="left"]  { left: 4px; top: 50%; transform: translateY(-50%); }
+  body.rpg-mode .touch-dpad button[data-key="right"] { right: 4px; top: 50%; transform: translateY(-50%); }
+  .touch-controls button.pressed {
+    background: rgba(234, 179, 8, 0.6) !important;
+    border-color: #fde047 !important;
+    color: #fff;
+  }
+}
