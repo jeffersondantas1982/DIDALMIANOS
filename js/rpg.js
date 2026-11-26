@@ -13,7 +13,7 @@ window.Jogo.RPG = (function () {
   const VW = 960;
   const VH = 540;
 
-  const { GRASS, PATH, WATER, TREE, ROCK, WALL, FLOOR, FLOWER, MUD, HWALL, ROOF, DOOR, BUSH, GATE, DEAD, SWATER, DOCK } = W.TILE;
+  const { GRASS, PATH, WATER, TREE, ROCK, WALL, FLOOR, FLOWER, MUD, HWALL, ROOF, DOOR, BUSH, GATE, DEAD, SWATER, DOCK, LAVA } = W.TILE;
   const SOLID = W.SOLID;
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
@@ -27,7 +27,8 @@ window.Jogo.RPG = (function () {
     { id: 1, title: 'ATO 1: CONTINENTE', name: 'Ato 1 — Continente das Árvores', spawn: { x: 32 * T + 16, y: 42 * T + 16 } },
     { id: 2, title: 'ATO 2: TORRE NO MAR', name: 'Ato 2 — A Torre no Mar', spawn: { x: 32 * T + 16, y: 41 * T + 16 } },
     { id: 3, title: 'ATO 3: BERMUDAS', name: 'Ato 3 — Triângulo das Bermudas', spawn: { x: 32 * T + 16, y: 41 * T + 16 } },
-    { id: 4, title: 'ATO 4: AS ESFERAS', name: 'Ato 4 — A Lenda das Esferas', spawn: { x: 32 * T + 16, y: 41 * T + 16 } }
+    { id: 4, title: 'ATO 4: AS ESFERAS', name: 'Ato 4 — A Lenda das Esferas', spawn: { x: 32 * T + 16, y: 41 * T + 16 } },
+    { id: 5, title: 'ATO 5: LAGO DE FOGO', name: 'Ato 5 — Ruínas & Lago de Fogo', spawn: { x: 32 * T + 16, y: 41 * T + 16 } }
   ];
 
   let env = null;
@@ -80,6 +81,7 @@ window.Jogo.RPG = (function () {
     if (n === 2) return !!(flags.act2Unlocked || flags.final);
     if (n === 3) return !!(flags.act3Unlocked || flags.towerBoss);
     if (n === 4) return !!(flags.act4Unlocked || flags.bermudaBoss);
+    if (n === 5) return !!(flags.act5Unlocked || flags.legendBoss);
     return false;
   }
 
@@ -308,6 +310,19 @@ window.Jogo.RPG = (function () {
         c.fillStyle = '#facc15'; c.strokeStyle = '#7a5b00'; c.lineWidth = 1.5;
         c.beginPath(); c.roundRect(11, 13, 10, 9, 2); c.fill(); c.stroke();
         break;
+      case LAVA: {
+        c.fillStyle = f ? '#dc2626' : '#b91c1c';
+        c.fillRect(0, 0, T, T);
+        c.fillStyle = f ? '#fb923c' : '#f97316';
+        for (let i = 0; i < 4; i++) {
+          const lx = 4 + rnd(v, i + 7) * 22;
+          const ly = 4 + rnd(v, i + 17) * 22;
+          c.beginPath(); c.arc(lx, ly, 3 + (i % 2) * 2, 0, Math.PI * 2); c.fill();
+        }
+        c.fillStyle = '#fde047';
+        c.fillRect(rnd(v, 31) * 24, rnd(v, 41) * 24, 4, 2);
+        break;
+      }
       default:
         c.fillStyle = '#334155'; c.fillRect(0, 0, T, T);
     }
@@ -316,7 +331,7 @@ window.Jogo.RPG = (function () {
 
   function getTile(type, x, y) {
     const v = Math.floor(rnd(x, y + 3) * 4);
-    const f = type === WATER || type === SWATER ? Math.floor(time * 2) % 2 : 0;
+    const f = type === WATER || type === SWATER || type === LAVA ? Math.floor(time * 2.5) % 2 : 0;
     const key = act + '_' + type + '_' + v + '_' + f;
     if (!tileCache[key]) tileCache[key] = buildTile(type, v, f);
     return tileCache[key];
@@ -326,12 +341,12 @@ window.Jogo.RPG = (function () {
     mini = mk(); mini.width = MW * 2; mini.height = MH * 2;
     const c = mini.getContext('2d');
     const col = {
-      0: act === 3 ? '#2c7a7b' : '#5bb450', 1: act === 4 ? '#ca8a04' : '#cfa96e',
+      0: act === 3 ? '#2c7a7b' : '#5bb450', 1: act === 4 ? '#ca8a04' : act === 5 ? '#78716c' : '#cfa96e',
       2: act === 4 ? '#1e1038' : act === 3 ? '#0f4c5c' : '#2563eb',
-      3: '#2f7a3c', 4: '#9ca3af', 5: act === 4 ? '#581c87' : '#4a4560',
-      6: act === 4 ? '#4338ca' : '#9a96b3', 7: '#6fc460', 8: '#6d6a3a',
+      3: '#2f7a3c', 4: '#9ca3af', 5: act === 4 ? '#581c87' : act === 5 ? '#44403c' : '#4a4560',
+      6: act === 4 ? '#4338ca' : act === 5 ? '#57534e' : '#9a96b3', 7: '#6fc460', 8: act === 5 ? '#3b2f2f' : '#6d6a3a',
       10: '#e8d9b5', 11: '#b3402f', 12: '#5a3418', 14: '#2f9d49',
-      15: '#facc15', 16: '#3f3a35', 17: '#3b6b3a', 18: '#a16207'
+      15: '#facc15', 16: '#3f3a35', 17: '#3b6b3a', 18: '#a16207', 19: '#f97316'
     };
     for (let y = 0; y < MH; y++) {
       for (let x = 0; x < MW; x++) {
@@ -391,8 +406,8 @@ window.Jogo.RPG = (function () {
   function gateKeyFor(a) { return a === 1 ? 'gates' : 'gates' + a; }
 
   function loadAct(targetAct, spawnPos) {
-    act = clamp(targetAct, 1, 4);
-    const builders = [null, W.buildAct1, W.buildAct2, W.buildAct3, W.buildAct4];
+    act = clamp(targetAct, 1, 5);
+    const builders = [null, W.buildAct1, W.buildAct2, W.buildAct3, W.buildAct4, W.buildAct5];
     map = builders[act]();
     tileCache = {};
     (flags[gateKeyFor(act)] || []).forEach((g) => floodOpen(g[0], g[1]));
@@ -505,7 +520,7 @@ window.Jogo.RPG = (function () {
       if (!flags.abyssBoss) enemies.push(makeBoss('abyssBoss', 52 * T + 16, 31 * T));
       // Feras marinhas do Triangulo das Bermudas (combate naval!)
       [[23, 30], [41, 30], [22, 43], [42, 43], [14, 18], [50, 18]].forEach(([x, y]) => enemies.push(makeEnemy('seabeast', x * T + 16, y * T + 16, '#0d9488')));
-    } else {
+    } else if (act === 4) {
       // ATO 4: A LENDA DAS ESFERAS
       props.push({ kind: 'altar', x: 31 * T, y: 3 * T, solid: true, rect: { x: 31 * T + 4, y: 4 * T, w: 88, h: 60 } });
       props.push({ kind: 'boat', x: 31 * T + 12, y: 44 * T + 8, solid: false, rect: { x: 0, y: 0, w: 0, h: 0 } });
@@ -531,6 +546,40 @@ window.Jogo.RPG = (function () {
 
       if (!flags.solarBoss) enemies.push(makeBoss('solarBoss', 12 * T + 16, 30 * T));
       if (!flags.astralBoss) enemies.push(makeBoss('astralBoss', 52 * T + 16, 30 * T));
+    } else {
+      // ATO 5: RUINAS DIDALMIANAS, ARVORES ARCANAS E LAGO DE FOGO
+      props.push({ kind: 'altar', x: 31 * T, y: 2 * T + 12, solid: true, rect: { x: 31 * T + 4, y: 3 * T + 12, w: 88, h: 56 } });
+      props.push({ kind: 'boat', x: 31 * T + 12, y: 44 * T + 8, solid: false, rect: { x: 0, y: 0, w: 0, h: 0 } });
+      // 3 Arvores Arcanas em destaque (Tarefa 1 da Chave!)
+      props.push({ kind: 'arcaneTree', id: 'flame', name: 'Árvore da Chama', color: '#f97316', x: 5 * T, y: 35 * T, solid: true, rect: { x: 5 * T + 8, y: 36 * T, w: 48, h: 36 } });
+      props.push({ kind: 'arcaneTree', id: 'stone', name: 'Árvore da Rocha', color: '#eab308', x: 31 * T, y: 23 * T, solid: true, rect: { x: 31 * T + 8, y: 24 * T, w: 48, h: 36 } });
+      props.push({ kind: 'arcaneTree', id: 'ether', name: 'Árvore do Éter', color: '#38bdf8', x: 55 * T, y: 35 * T, solid: true, rect: { x: 55 * T + 8, y: 36 * T, w: 48, h: 36 } });
+
+      ch('act5Heart1', 6, 42, 'heart'); ch('act5Heart2', 57, 42, 'heart');
+      ch('act5Potions', 26, 39, 'potion', 4); ch('act5Gems', 35, 22, 'spheres', 60);
+
+      npcs.push({ id: 'kael', name: 'Forjador Kael', x: 34 * T + 16, y: 40 * T + 8, dir: 'left', pal: { hair: '#fbbf24', coat: '#7c2d12', trim: '#fde047', skin: '#e6b89c', horn: '#9a3412', mask: false } });
+      npcs.push({ id: 'mate5', name: mateName, x: 30 * T + 16, y: 40 * T + 8, dir: 'right', pal: RPG_CHAR[mateId].pal });
+      npcs.push({ id: 'shop', name: 'Armeiro Bram', x: 37 * T + 16, y: 39 * T + 8, dir: 'down', pal: bramPal });
+
+      sg(30, 38, 'Ato 5 — Ruínas Didalmianas & Lago de Fogo. Para forjar a Chave: 1) Ative as 3 Árvores Arcanas; 2) Derrote o Monstro de Pedra Ancião (Oeste); 3) Fale com o Forjador Kael!');
+      sg(30, 16, 'Portão do Lago de Fogo. Só abre com a Chave Ancestral forjada por Kael.');
+      ensureClear();
+
+      // Monstros de Pedra + inimigos vulcanicos
+      [[10, 39], [16, 34], [29, 27], [46, 39], [52, 34], [26, 12], [38, 12]].forEach(([x, y]) => sp('stoneMonster', x, y, '#78716c'));
+      [[12, 36], [48, 36], [34, 27]].forEach(([x, y]) => sp('phantom', x, y, '#f97316'));
+      [[8, 22], [54, 22], [23, 12], [41, 12]].forEach(([x, y]) => sp('sentinel', x, y));
+
+      // Monstro de Pedra Anciao (guarda a Pedra Runica para a Chave!)
+      if (!flags.runeStone) {
+        const sm = makeEnemy('stoneMonster', 11 * T + 16, 40 * T + 16, '#ea580c');
+        sm.hp = Math.round(sm.hp * 2.0); sm.maxHp = sm.hp; sm.size = 40; sm.isKeyGuardian = true;
+        enemies.push(sm);
+      }
+
+      if (!flags.magmaBoss) enemies.push(makeBoss('magmaBoss', 10 * T + 16, 13 * T));
+      if (!flags.ruinBoss) enemies.push(makeBoss('ruinBoss', 53 * T + 16, 13 * T));
     }
 
     const spPos = spawnPos || ACT_META[act].spawn;
@@ -550,7 +599,7 @@ window.Jogo.RPG = (function () {
       atq: stats.atq, def: stats.def, spd: stats.spd,
       atkT: 0, atkCd: 0, shotCd: 0, dashT: 0, dashCd: 0, inv: 0, kx: 0, ky: 0, kT: 0, dvx: 0, dvy: 0,
       hit: new Set(), moving: false, anim: 0, keys: 0, gems: 10,
-      orbs: 0, seals: 0, vertices: 0, primals: 0, potions: 1,
+      orbs: 0, seals: 0, vertices: 0, primals: 0, embers: 0, potions: 1,
       upgrades: { weapon: 0, armor: 0, boots: 0 }
     };
   }
@@ -564,7 +613,7 @@ window.Jogo.RPG = (function () {
         act,
         stats: { level: P.level, exp: P.exp, expToNext: P.expToNext, maxHp: P.maxHp, atq: P.atq, def: P.def, spd: P.spd },
         hp: P.hp, keys: P.keys, gems: P.gems,
-        orbs: P.orbs, seals: P.seals, vertices: P.vertices, primals: P.primals,
+        orbs: P.orbs, seals: P.seals, vertices: P.vertices, primals: P.primals, embers: P.embers,
         potions: P.potions, upgrades: P.upgrades, flags, x: P.x, y: P.y
       };
       localStorage.setItem(saveKey(), JSON.stringify(s));
@@ -585,8 +634,8 @@ window.Jogo.RPG = (function () {
     const sv = loadSave();
     const base = env.Chars[charId].stats;
 
-    flags = Object.assign({ chests: [], gates: [], gates2: [], gates3: [], gates4: [] }, sv && sv.flags ? sv.flags : {});
-    ['chests', 'gates', 'gates2', 'gates3', 'gates4'].forEach((k) => { flags[k] = flags[k] || []; });
+    flags = Object.assign({ chests: [], gates: [], gates2: [], gates3: [], gates4: [], gates5: [], act5Trees: [] }, sv && sv.flags ? sv.flags : {});
+    ['chests', 'gates', 'gates2', 'gates3', 'gates4', 'gates5', 'act5Trees'].forEach((k) => { flags[k] = flags[k] || []; });
 
     P = newPlayer(sv ? sv.stats : base);
     if (sv) {
@@ -597,11 +646,12 @@ window.Jogo.RPG = (function () {
       P.seals = sv.seals || 0;
       P.vertices = sv.vertices || 0;
       P.primals = sv.primals || 0;
+      P.embers = sv.embers || 0;
       P.potions = sv.potions != null ? sv.potions : 1;
       P.upgrades = Object.assign({ weapon: 0, armor: 0, boots: 0 }, sv.upgrades || {});
     }
 
-    const startAct = sv && sv.act >= 1 && sv.act <= 4 ? sv.act : 1;
+    const startAct = sv && sv.act >= 1 && sv.act <= 5 ? sv.act : 1;
     loadAct(startAct, sv && sv.x ? { x: sv.x, y: sv.y } : null);
 
     toasts = []; dlg = null; shop = null; travel = null;
@@ -746,6 +796,29 @@ window.Jogo.RPG = (function () {
         'Conquiste a Esfera Solar (Oeste) e a Esfera Astral (Leste), abra o Portão da Lenda e prove seu valor ao Arquiteto das Esferas!'
       ];
     }
+    if (id === 'kael') {
+      const trees = (flags.act5Trees || []).length;
+      if (flags.act5KeyForged) return ['A Chave Ancestral já foi forjada! Abra o Portão do Lago de Fogo ao norte e enfrente o Guardião Supremo das Árvores!'];
+      if (trees >= 3 && flags.runeStone) {
+        flags.act5KeyForged = true;
+        P.keys++;
+        env.Audio.win();
+        saveGame();
+        return [
+          'Magnífico, ' + heroName + '! As 3 Árvores Arcanas despertaram e você trouxe a Pedra Rúnica do Monstro de Pedra Ancião!',
+          'Com o calor do Lago de Fogo... PRONTO! Forjei a CHAVE ANCESTRAL DIDALMIANA! Vá destrancar o Portão ao norte!'
+        ];
+      }
+      return [
+        'As Ruínas Didalmianas guardam o segredo final das Árvores de Arcano. Para forjar a Chave do Portão Norte, cumpra duas tarefas:',
+        '1) Ative as 3 Árvores Arcanas (Chama a Oeste, Rocha na Ilha Central, Éter a Leste) — Progresso: ' + trees + '/3.',
+        '2) Derrote o Monstro de Pedra Ancião nas Ruínas a Oeste para obter a Pedra Rúnica — ' + (flags.runeStone ? 'Concluído!' : 'Pendente!')
+      ];
+    }
+    if (id === 'mate5') {
+      if (flags.supremeBoss) return ['Nós sobrevivemos ao Lago de Fogo e vencemos o Guardião Supremo, ' + heroName + '! Somos lendas!'];
+      return ['Esse Lago de Fogo dá calor até de longe... Cuidado com os Monstros de Pedra e com os chefões daqui — eles são MUITO mais rápidos!'];
+    }
     if (id === 'captain') {
       return ['Use a Barca no Cais Sul para escolher qualquer Ato desbloqueado!'];
     }
@@ -781,13 +854,19 @@ window.Jogo.RPG = (function () {
     for (const n of npcs) if (dist(fx, fy, n.x, n.y) < 34) return n.id === 'shop' ? '[Espaço] Loja do Bram' : '[Espaço] Falar com ' + n.name;
     for (const c of chests) if (!c.opened && dist(fx, fy, c.x * T + 16, c.y * T + 16) < 30) return '[Espaço] Abrir Baú';
     for (const s of signs) if (dist(fx, fy, s.x * T + 16, s.y * T + 16) < 30) return '[Espaço] Ler Placa';
+    for (const p of props) {
+      if (p.kind === 'arcaneTree' && dist(P.x, P.y, p.x + 32, p.y + 44) < 64) {
+        const done = (flags.act5Trees || []).includes(p.id);
+        return done ? p.name + ' (Ativada ✓)' : '[Espaço] Ativar ' + p.name;
+      }
+    }
     const boat = props.find((p) => p.kind === 'boat');
     if (boat && dist(P.x, P.y, boat.x + 20, boat.y + 12) < 58) {
-      return isActUnlocked(2) ? '[Espaço] Mapa de Viagem (Atos 1–4)' : 'Barca trancada (Conclua o Ato 1)';
+      return isActUnlocked(2) ? '[Espaço] Mapa de Viagem (Atos 1–5)' : 'Barca trancada (Conclua o Ato 1)';
     }
     const altar = props[0];
     if (altar && dist(P.x, P.y, altar.x + 48, altar.y + 80) < 100) {
-      const labels = ['', '[Espaço] Árvore Ancestral', '[Espaço] Núcleo das Esferas', '[Espaço] Vórtice das Bermudas', '[Espaço] Trono da Lenda'];
+      const labels = ['', '[Espaço] Árvore Ancestral', '[Espaço] Núcleo das Esferas', '[Espaço] Vórtice das Bermudas', '[Espaço] Trono da Lenda', '[Espaço] Santuário do Lago de Fogo'];
       return labels[act];
     }
     if (tileAt(Math.floor(fx / T), Math.floor(fy / T)) === GATE) return '[Espaço] Abrir Portão (Chave)';
@@ -844,6 +923,25 @@ window.Jogo.RPG = (function () {
       return true;
     }
 
+    // Arvores Arcanas interativas (Ato 5 - Tarefa 1 da Chave)
+    for (const p of props) {
+      if (p.kind === 'arcaneTree' && dist(P.x, P.y, p.x + 32, p.y + 44) < 66) {
+        if (!flags.act5Trees.includes(p.id)) {
+          flags.act5Trees.push(p.id);
+          env.Audio.levelUp();
+          burst(p.x + 32, p.y + 24, p.color, 18);
+          saveGame();
+          say(p.name, [
+            'A ' + p.name + ' ressoa com o poder dos Didalmianos! (' + flags.act5Trees.length + '/3 Árvores Arcanas ativadas)',
+            flags.act5Trees.length >= 3 ? 'Todas as 3 Árvores Arcanas estão ativas! Leve a Pedra Rúnica ao Forjador Kael!' : 'Continue ativando as outras Árvores Arcanas nas Ruínas!'
+          ]);
+        } else {
+          say(p.name, ['A ' + p.name + ' já está desperta e canalizando energia para a Chave Ancestral.']);
+        }
+        return true;
+      }
+    }
+
     const altar = props[0];
     if (altar && dist(P.x, P.y, altar.x + 48, altar.y + 80) < 100) {
       if (act === 1) {
@@ -861,11 +959,16 @@ window.Jogo.RPG = (function () {
         else if (flags.bermudaBossStart) toast('O Vórtice das Bermudas já despertou!');
         else if (P.vertices < 2) say('Berço Didalmiano', ['Faltam Vértices do Triângulo (' + P.vertices + '/2). Derrote Névoa (Oeste) e Abismo (Leste).']);
         else say('Berço Didalmiano', ['O Triângulo das Bermudas se alinha...', 'O Vórtice das Bermudas desperta!'], () => { flags.bermudaBossStart = true; enemies.push(makeBoss('bermudaBoss', 32 * T + 16, 7 * T + 8)); env.Audio.hit(); });
-      } else {
-        if (flags.legendBoss) say('Trono da Lenda', ['As Esferas Primordiais cantam em harmonia! Você completou os 4 Atos!']);
+      } else if (act === 4) {
+        if (flags.legendBoss) say('Trono da Lenda', ['O Arquiteto liberou a passagem para o Ato 5: Ruínas Didalmianas & Lago de Fogo! Use a Barca!']);
         else if (flags.legendBossStart) toast('O Arquiteto das Esferas já está diante de você!');
         else if (P.primals < 2) say('Trono da Lenda', ['Faltam Esferas Primordiais (' + P.primals + '/2). Derrote a Esfera Solar (Oeste) e a Astral (Leste).']);
-        else say('Trono da Lenda', ['As Esferas Primordiais se unem em luz dourada...', 'O Arquiteto das Esferas surge para o desafio final!'], () => { flags.legendBossStart = true; enemies.push(makeBoss('legendBoss', 32 * T + 16, 7 * T + 8)); env.Audio.hit(); });
+        else say('Trono da Lenda', ['As Esferas Primordiais se unem em luz dourada...', 'O Arquiteto das Esferas surge!'], () => { flags.legendBossStart = true; enemies.push(makeBoss('legendBoss', 32 * T + 16, 7 * T + 8)); env.Audio.hit(); });
+      } else {
+        if (flags.supremeBoss) say('Santuário do Lago de Fogo', ['O Guardião Supremo das Árvores foi vencido! Você dominou todos os 5 Atos!']);
+        else if (flags.supremeBossStart) toast('O Guardião Supremo já está no campo de batalha!');
+        else if (P.embers < 2) say('Santuário do Lago de Fogo', ['Derrote o Colosso de Magma (Oeste) e o Titã das Ruínas (Leste) primeiro — Relíquias: ' + P.embers + '/2.']);
+        else say('Santuário do Lago de Fogo', ['A Brasa Arcana e o Núcleo de Pedra estremecem o Lago de Fogo...', 'O GUARDIÃO SUPREMO DAS ÁRVORES DESPERTA!'], () => { flags.supremeBossStart = true; enemies.push(makeBoss('supremeBoss', 32 * T + 16, 6 * T + 8)); env.Audio.hit(); });
       }
       return true;
     }
@@ -954,11 +1057,20 @@ window.Jogo.RPG = (function () {
           'ATO 4 DESBLOQUEADO: Use a Barca no Cais Sul para entrar no Santuário Primordial!'
         ]);
       } else if (e.key === 'legendBoss') {
-        flags.legendBoss = true;
+        flags.legendBoss = true; flags.act5Unlocked = true;
         say('Trono da Lenda', [
-          'O Arquiteto das Esferas reconhece a força e a astúcia dos Didalmianos!',
-          'A Lenda das Esferas está completa: o Continente, a Torre no Mar e o Triângulo das Bermudas brilham em paz eterna!'
+          'O Arquiteto das Esferas reconhece a força dos Didalmianos, mas revela um último desafio ancestral!',
+          'ATO 5 DESBLOQUEADO: As Ruínas Didalmianas e o LAGO DE FOGO! Use a Barca para enfrentar o Guardião Supremo!'
+        ]);
+      } else if (e.key === 'supremeBoss') {
+        flags.supremeBoss = true;
+        say('Santuário do Lago de Fogo', [
+          'O Guardião Supremo das Árvores foi derrotado! O Lago de Fogo se acalma e todas as Árvores de Arcano florescem em glória!',
+          heroName + ' e ' + mateName + ' completaram a saga épica dos 5 Atos!'
         ], () => { winT = 2.0; });
+      } else if (e.key === 'magmaBoss' || e.key === 'ruinBoss') {
+        flags[e.key] = true; P.embers++;
+        toast(W.BOSS_DEF[e.key].orb + ' obtida! (' + P.embers + '/2)');
       } else if (e.key === 'stormBoss' || e.key === 'tideBoss') {
         flags[e.key] = true; P.seals++;
         toast('Selo da ' + W.BOSS_DEF[e.key].orb + ' obtido! (' + P.seals + '/2)');
@@ -974,6 +1086,12 @@ window.Jogo.RPG = (function () {
       }
       saveGame();
     } else {
+      if (e.isKeyGuardian) {
+        flags.runeStone = true;
+        env.Audio.win();
+        toast('Você obteve a PEDRA RÚNICA! Leve-a ao Forjador Kael!');
+        saveGame();
+      }
       const r = rr();
       if (r < 0.42) drops.push({ x: e.x, y: e.y, type: 'gem', t: 0 });
       else if (r < 0.58) drops.push({ x: e.x, y: e.y, type: 'heart', t: 0 });
@@ -991,8 +1109,15 @@ window.Jogo.RPG = (function () {
     if (e.kT > 0) { e.kT -= dt; moveBox(e, e.kx * dt, e.ky * dt, hw, hw, e.fly); return; }
     const dx = P.x - e.x; const dy = P.y - e.y; const dd = Math.hypot(dx, dy) || 1;
 
-    if (e.type === 'slime' || e.type === 'knight' || e.type === 'corsair' || e.type === 'golem') {
-      const chase = dd < (e.type === 'slime' ? 170 : 240);
+    if (e.type === 'slime' || e.type === 'knight' || e.type === 'corsair' || e.type === 'golem' || e.type === 'stoneMonster') {
+      const chase = dd < (e.type === 'slime' ? 170 : 250);
+      if (e.type === 'stoneMonster') {
+        e.shootT -= dt;
+        if (dd < 280 && e.shootT <= 0) {
+          e.shootT = 2.2;
+          shootEnemy(e, 220, e.dmg - 4, '#f97316', Math.atan2(dy, dx));
+        }
+      }
       if (chase) {
         moveBox(e, (dx / dd) * e.speed * 1.25 * dt, 0, hw, hw);
         moveBox(e, 0, (dy / dd) * e.speed * 1.25 * dt, hw, hw);
@@ -1041,7 +1166,7 @@ window.Jogo.RPG = (function () {
     const diff = env.getDifficulty ? env.getDifficulty() : 'normal';
     const hard = diff === 'hard';
     const easy = diff === 'easy';
-    const rage = e.hp < e.maxHp * 0.5 ? 1.38 : 1;
+    const rage = (e.hp < e.maxHp * 0.5 ? 1.42 : 1) * (act === 5 ? 1.24 : 1);
     const hw = e.size / 2 - 6;
     e.patT -= dt * rage * (hard ? 1.35 : easy ? 0.8 : 1);
 
@@ -1153,10 +1278,10 @@ window.Jogo.RPG = (function () {
     ['atkT', 'atkCd', 'shotCd', 'dashT', 'dashCd', 'inv'].forEach((k) => { if (P[k] > 0) P[k] -= dt; });
     if (deadT > 0) { deadT -= dt; if (deadT <= 0) respawn(); return; }
 
-    // Menu de Viagem (Atos 1-4)
+    // Menu de Viagem (Atos 1-5)
     if (travel) {
-      if (is('ArrowUp', 'KeyW')) travel.idx = (travel.idx + 3) % 4;
-      if (is('ArrowDown', 'KeyS')) travel.idx = (travel.idx + 1) % 4;
+      if (is('ArrowUp', 'KeyW')) travel.idx = (travel.idx + 4) % 5;
+      if (is('ArrowDown', 'KeyS')) travel.idx = (travel.idx + 1) % 5;
       if (is('Space', 'Enter', 'KeyE')) {
         const dest = travel.idx + 1;
         if (isActUnlocked(dest)) {
@@ -1366,6 +1491,20 @@ window.Jogo.RPG = (function () {
       c.fillStyle = e.type === 'phantom' ? e.color : (e.type === 'stormling' ? '#0284c7' : '#4c1d95');
       c.beginPath(); c.moveTo(0, -2); c.quadraticCurveTo(-12, -10 - fl, -18, -fl); c.lineTo(0, 8); c.lineTo(18, -fl); c.quadraticCurveTo(12, -10 - fl, 0, -2); c.fill(); c.stroke();
       c.fillStyle = '#fde047'; c.fillRect(-3, -2, 2, 2); c.fillRect(1, -2, 2, 2);
+    } else if (e.type === 'stoneMonster') {
+      // Monstro de Pedra com rachaduras de magma
+      const s = e.size / 2;
+      c.fillStyle = '#57534e'; c.strokeStyle = '#14100a'; c.lineWidth = 2;
+      c.beginPath(); c.roundRect(-s, -s + 4, s * 2, s * 2 - 4, 7); c.fill(); c.stroke();
+      // Rachaduras incandescentes
+      c.strokeStyle = e.isKeyGuardian ? '#fde047' : '#f97316'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(-6, -4); c.lineTo(0, 4); c.lineTo(7, -2); c.stroke();
+      c.fillStyle = e.isKeyGuardian ? '#fde047' : '#ef4444';
+      c.fillRect(-7, -8, 5, 4); c.fillRect(3, -8, 5, 4);
+      if (e.isKeyGuardian) {
+        c.fillStyle = '#fde047'; c.font = 'bold 10px Segoe UI, sans-serif'; c.textAlign = 'center';
+        c.fillText('ANCIÃO', 0, -s - 4); c.textAlign = 'left';
+      }
     } else if (e.type === 'knight' || e.type === 'corsair' || e.type === 'golem') {
       c.fillStyle = e.type === 'golem' ? e.color : (e.type === 'corsair' ? '#1e3a8a' : '#475569');
       c.beginPath(); c.roundRect(-12, -9, 24, 24, 5); c.fill(); c.stroke();
@@ -1455,6 +1594,24 @@ window.Jogo.RPG = (function () {
       c.beginPath(); c.roundRect(x, y, 44, 20, [4, 4, 12, 12]); c.fill(); c.stroke();
       c.fillStyle = isActUnlocked(2) ? '#38bdf8' : '#94a3b8';
       c.beginPath(); c.moveTo(x + 22, y + 4); c.lineTo(x + 22, y - 22); c.lineTo(x + 38, y - 8); c.closePath(); c.fill(); c.stroke();
+      c.restore();
+    }
+
+    // Arvores Arcanas em destaque (Ato 5)
+    for (const p of props) {
+      if (p.kind !== 'arcaneTree') continue;
+      const x = p.x - camX; const y = p.y - camY;
+      if (x < -90 || x > VW + 40 || y < -90 || y > VH + 40) continue;
+      const lit = (flags.act5Trees || []).includes(p.id);
+      c.save();
+      const g = c.createRadialGradient(x + 32, y + 20, 6, x + 32, y + 20, 62);
+      g.addColorStop(0, p.color + (lit ? 'aa' : '44')); g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g; c.fillRect(x - 36, y - 44, 136, 136);
+      c.fillStyle = '#4a2c17'; c.strokeStyle = '#14100a'; c.lineWidth = 2;
+      c.fillRect(x + 22, y + 32, 20, 40); c.strokeRect(x + 22, y + 32, 20, 40);
+      c.fillStyle = lit ? p.color : '#334155';
+      [[32, 18, 24], [14, 28, 17], [50, 28, 17]].forEach(([dx, dy, r]) => { c.beginPath(); c.arc(x + dx, y + dy, r, 0, Math.PI * 2); c.fill(); c.stroke(); });
+      c.fillStyle = lit ? '#fde047' : '#94a3b8'; c.beginPath(); c.arc(x + 32, y + 20, 7 + Math.sin(time * 4) * 2, 0, Math.PI * 2); c.fill();
       c.restore();
     }
 
@@ -1566,7 +1723,7 @@ window.Jogo.RPG = (function () {
     c.fillStyle = '#facc15'; c.fillText('🗝' + P.keys, 66, by + 47);
     c.fillStyle = '#4ade80'; c.fillText('Q:🧪' + P.potions, 108, by + 47);
 
-    const slotCfg = [null, [3, P.orbs, '#fde047'], [2, P.seals, '#38bdf8'], [2, P.vertices, '#2dd4bf'], [2, P.primals, '#facc15']][act];
+    const slotCfg = [null, [3, P.orbs, '#fde047'], [2, P.seals, '#38bdf8'], [2, P.vertices, '#2dd4bf'], [2, P.primals, '#facc15'], [2, P.embers, '#f97316']][act];
     for (let i = 0; i < slotCfg[0]; i++) {
       c.fillStyle = i < slotCfg[1] ? slotCfg[2] : '#374151';
       c.strokeStyle = '#14100a';
@@ -1604,7 +1761,8 @@ window.Jogo.RPG = (function () {
       if (act === 1) obj = flags.final ? 'Ato 1 concluído! Use a Barca ao sul para ir ao Ato 2.' : P.orbs >= 3 ? 'Leve os 3 Orbes à Árvore Ancestral ao norte!' : 'Ato 1: Derrote os 3 Guardiões (Orbes ' + P.orbs + '/3).';
       else if (act === 2) obj = flags.towerBoss ? 'Ato 2 concluído! Use a Barca para ir ao Triângulo das Bermudas (Ato 3)!' : P.seals >= 2 ? 'Leve os 2 Selos ao Núcleo das Esferas ao norte!' : 'Ato 2: Derrote Tempestade (Oeste) e Maré (Leste) — Selos ' + P.seals + '/2.';
       else if (act === 3) obj = flags.bermudaBoss ? 'Ato 3 concluído! Use a Barca para A Lenda das Esferas (Ato 4)!' : P.vertices >= 2 ? 'Vá ao Berço Didalmiano no extremo norte!' : 'Ato 3: Derrote Névoa (Oeste) e Abismo (Leste) — Vértices ' + P.vertices + '/2.';
-      else obj = flags.legendBoss ? 'Todos os 4 Atos concluídos! Lenda das Esferas purificada!' : P.primals >= 2 ? 'Enfrente o Arquiteto das Esferas no Trono ao norte!' : 'Ato 4: Derrote Esfera Solar (Oeste) e Astral (Leste) — ' + P.primals + '/2.';
+      else if (act === 4) obj = flags.legendBoss ? 'Ato 4 concluído! Use a Barca para o Ato 5: Ruínas & Lago de Fogo!' : P.primals >= 2 ? 'Enfrente o Arquiteto das Esferas no Trono ao norte!' : 'Ato 4: Derrote Esfera Solar (Oeste) e Astral (Leste) — ' + P.primals + '/2.';
+      else obj = flags.supremeBoss ? 'Todos os 5 Atos concluídos!' : !flags.act5KeyForged ? 'Chave: Árvores ' + (flags.act5Trees || []).length + '/3 • Pedra Rúnica: ' + (flags.runeStone ? '✓' : 'Oeste') + ' → Kael' : P.embers >= 2 ? 'Enfrente o Guardião Supremo no Santuário ao norte!' : 'Ato 5: Derrote Colosso de Magma (Oeste) e Titã das Ruínas (Leste) — ' + P.embers + '/2.';
 
       c.font = '12px Segoe UI, sans-serif';
       const w = c.measureText(obj).width + 20;
@@ -1622,14 +1780,14 @@ window.Jogo.RPG = (function () {
     });
     c.textAlign = 'left';
 
-    // Menu de Viagem (Atos 1-4)
+    // Menu de Viagem (Atos 1-5)
     if (travel) {
-      const sw = 440; const sh = 250; const sx = (VW - sw) / 2; const sy = (VH - sh) / 2;
+      const sw = 450; const sh = 290; const sx = (VW - sw) / 2; const sy = (VH - sh) / 2;
       panel(c, sx, sy, sw, sh);
       c.fillStyle = '#fde047'; c.font = 'bold 17px Segoe UI, sans-serif';
       c.fillText('⛵ Mapa de Viagem — Barca Arcana', sx + 20, sy + 30);
-      for (let i = 0; i < 4; i++) {
-        const aNum = i + 1; const iy = sy + 48 + i * 42;
+      for (let i = 0; i < 5; i++) {
+        const aNum = i + 1; const iy = sy + 46 + i * 42;
         const sel = i === travel.idx; const unl = isActUnlocked(aNum);
         c.fillStyle = sel ? 'rgba(56,189,248,0.24)' : 'rgba(255,255,255,0.04)';
         c.strokeStyle = sel ? '#38bdf8' : '#334155'; c.lineWidth = 1.5;

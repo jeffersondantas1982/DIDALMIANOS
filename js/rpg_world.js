@@ -14,12 +14,12 @@ window.Jogo.RPGWorld = (function () {
   const TILE = {
     GRASS: 0, PATH: 1, WATER: 2, TREE: 3, ROCK: 4, WALL: 5, FLOOR: 6,
     FLOWER: 7, MUD: 8, HWALL: 10, ROOF: 11, DOOR: 12, BUSH: 14,
-    GATE: 15, DEAD: 16, SWATER: 17, DOCK: 18
+    GATE: 15, DEAD: 16, SWATER: 17, DOCK: 18, LAVA: 19
   };
 
   const SOLID = [
     false, false, true, true, true, true, false, false, false, false,
-    true, true, true, false, true, true, true, true, false
+    true, true, true, false, true, true, true, true, false, true
   ];
 
   function rnd(a, b = 0) {
@@ -278,6 +278,70 @@ window.Jogo.RPGWorld = (function () {
     return m;
   }
 
+  /* ---- ATO 5: RUINAS DIDALMIANAS, ARVORES ARCANAS E LAGO DE FOGO ---- */
+  function buildAct5() {
+    const m = new Uint8Array(MW * MH);
+    const { set, rect } = makeHelpers(m);
+    const { GRASS, PATH, ROCK, WALL, FLOOR, MUD, BUSH, GATE, DEAD, DOCK, LAVA } = TILE;
+
+    // Solo vulcanico / ruinas antigas
+    for (let y = 0; y < MH; y++) {
+      for (let x = 0; x < MW; x++) {
+        const r = rnd(x + 700, y + 120);
+        set(x, y, r < 0.12 ? ROCK : r < 0.18 ? DEAD : r < 0.22 ? BUSH : MUD);
+      }
+    }
+
+    // Bordas de rocha/muralha
+    rect(0, 0, MW, 2, WALL);
+    rect(0, MH - 2, MW, 2, WALL);
+    rect(0, 0, 2, MH, WALL);
+    rect(MW - 2, 0, 2, MH, WALL);
+
+    // GRANDE LAGO DE FOGO (Centro e Norte)
+    rect(16, 15, 32, 16, LAVA);
+    rect(4, 18, 12, 10, LAVA);
+    rect(48, 18, 12, 10, LAVA);
+
+    // Praca de Chegada / Acampamento nas Ruinas (Sul)
+    rect(24, 37, 17, 9, FLOOR);
+    rect(31, 43, 3, 3, DOCK); // Portal/Barca de viagem (Atos 1-5)
+    rect(31, 31, 3, 7, PATH);
+
+    // Ilha Central do Lago de Fogo (Totem da Rocha + Ponte para o Norte)
+    rect(27, 21, 11, 9, FLOOR);
+    rect(31, 29, 3, 4, PATH); // Ponte Sul -> Ilha Central
+    rect(31, 11, 3, 11, PATH); // Ponte Ilha Central -> Cidadela Norte
+
+    // Regiao Oeste: Ruinas Didalmianas + Arvore da Chama + Arena Colosso de Magma
+    rect(3, 32, 20, 12, FLOOR);
+    rect(16, 38, 10, 3, PATH); // Caminho Sul -> Oeste
+    [7, 13, 18].forEach((x) => [35, 41].forEach((y) => set(x, y, WALL)));
+    rect(4, 28, 12, 5, PATH); // Ponte Oeste sobre a lava
+    rect(4, 9, 13, 10, FLOOR); // Arena Oeste (Colosso de Magma)
+    rect(8, 18, 3, 11, PATH); // Ponte Oeste Norte sobre a lava
+
+    // Regiao Leste: Bosque da Arvore do Eter + Arena Tita das Ruinas
+    rect(41, 32, 20, 12, GRASS);
+    rect(39, 38, 10, 3, PATH); // Caminho Sul -> Leste
+    [45, 51, 56].forEach((x) => [35, 41].forEach((y) => set(x, y, ROCK)));
+    rect(48, 28, 12, 5, PATH);
+    rect(47, 9, 13, 10, FLOOR); // Arena Leste (Tita das Ruinas)
+    rect(53, 18, 3, 11, PATH); // Ponte Leste Norte sobre a lava
+
+    // Cidadela do Lago de Fogo (Norte - trancada pela Chave Forjada!)
+    rect(20, 9, 25, 6, WALL);
+    rect(21, 10, 23, 4, FLOOR);
+    set(31, 14, GATE); set(32, 14, GATE); set(33, 14, GATE);
+
+    // Santuario Supremo (Extremo Norte)
+    rect(20, 1, 25, 9, WALL);
+    rect(22, 2, 21, 7, FLOOR);
+    rect(31, 9, 3, 2, FLOOR);
+
+    return m;
+  }
+
   const ENEMY_DEF = {
     slime: { hp: 20, dmg: 10, speed: 52, exp: 12, size: 22 },
     bat: { hp: 12, dmg: 8, speed: 95, exp: 10, size: 20, fly: true },
@@ -287,7 +351,8 @@ window.Jogo.RPGWorld = (function () {
     corsair: { hp: 72, dmg: 22, speed: 56, exp: 48, size: 26 },
     phantom: { hp: 85, dmg: 25, speed: 115, exp: 60, size: 24, fly: true },
     golem: { hp: 115, dmg: 28, speed: 52, exp: 75, size: 28 },
-    seabeast: { hp: 110, dmg: 26, speed: 92, exp: 80, size: 32, swim: true }
+    seabeast: { hp: 110, dmg: 26, speed: 92, exp: 80, size: 32, swim: true },
+    stoneMonster: { hp: 175, dmg: 34, speed: 62, exp: 120, size: 34 }
   };
 
   const BOSS_DEF = {
@@ -306,14 +371,18 @@ window.Jogo.RPGWorld = (function () {
 
     solarBoss: { name: 'Guardião da Esfera Solar', hp: 720, color: '#f97316', dmg: 30, speed: 86, patterns: ['dash', 'ring', 'fan'], exp: 520, orb: 'Solar', act: 4 },
     astralBoss: { name: 'Guardião da Esfera Astral', hp: 760, color: '#c084fc', dmg: 32, speed: 82, patterns: ['ring', 'summon', 'fan'], exp: 560, orb: 'Astral', act: 4 },
-    legendBoss: { name: 'Arquiteto das Esferas', hp: 1100, color: '#fde047', dmg: 35, speed: 92, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 1500, orb: 'Lenda Primordial', act: 4 }
+    legendBoss: { name: 'Arquiteto das Esferas', hp: 1100, color: '#fde047', dmg: 35, speed: 92, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 1500, orb: 'Lenda Primordial', act: 4 },
+
+    magmaBoss: { name: 'Colosso de Magma', hp: 980, color: '#ef4444', dmg: 36, speed: 108, patterns: ['dash', 'blink', 'ring', 'fan'], exp: 850, orb: 'Brasa Arcana', act: 5 },
+    ruinBoss: { name: 'Titã das Ruínas', hp: 1050, color: '#d97706', dmg: 38, speed: 104, patterns: ['blink', 'dash', 'summon', 'ring'], exp: 920, orb: 'Núcleo de Pedra', act: 5 },
+    supremeBoss: { name: 'Guardião Supremo das Árvores', hp: 1550, color: '#f97316', dmg: 42, speed: 118, patterns: ['blink', 'dash', 'ring', 'fan', 'summon'], exp: 2500, orb: 'Coroa Arcana', act: 5 }
   };
 
   const SHOP_ITEMS = [
     { id: 'potion', name: 'Poção de Esfera', desc: 'Cura +60 HP ao usar (tecla Q)', cost: 6, max: 99 },
-    { id: 'weapon', name: 'Reforjar Arma', desc: '+5 ATQ permanente', cost: 15, max: 5 },
-    { id: 'armor', name: 'Manto Arcano', desc: '+4 DEF permanente', cost: 15, max: 5 },
-    { id: 'boots', name: 'Botas do Saci', desc: '+3 SPD permanente', cost: 12, max: 3 }
+    { id: 'weapon', name: 'Reforjar Arma', desc: '+5 ATQ permanente', cost: 15, max: 7 },
+    { id: 'armor', name: 'Manto Arcano', desc: '+4 DEF permanente', cost: 15, max: 7 },
+    { id: 'boots', name: 'Botas do Saci', desc: '+3 SPD permanente', cost: 12, max: 4 }
   ];
 
   const INTRO_LINES = (heroName, mateName) => [
@@ -324,7 +393,7 @@ window.Jogo.RPGWorld = (function () {
 
   return {
     MW, MH, TILE, SOLID,
-    buildAct1, buildAct2, buildAct3, buildAct4,
+    buildAct1, buildAct2, buildAct3, buildAct4, buildAct5,
     ENEMY_DEF, BOSS_DEF, SHOP_ITEMS, INTRO_LINES
   };
 })();

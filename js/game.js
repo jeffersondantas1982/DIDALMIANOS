@@ -627,9 +627,9 @@ window.Jogo.Game = (function () {
 
   function rpgWin() {
     state = 'result';
-    document.getElementById('result-title').textContent = '🏆 A Lenda das Esferas Concluída!';
-    document.getElementById('result-subtitle').textContent = 'Você completou os 4 Atos: Continente, Torre no Mar, Triângulo das Bermudas e a Lenda das Esferas!';
-    document.getElementById('result-stats').innerHTML = 'O <strong>Arquiteto das Esferas</strong> reconheceu os Didalmianos.<br>As Árvores de Arcano e as Esferas Primordiais brilham em paz!';
+    document.getElementById('result-title').textContent = '🏆 Saga dos 5 Atos Concluída!';
+    document.getElementById('result-subtitle').textContent = 'Continente, Torre no Mar, Triângulo das Bermudas, Lenda das Esferas e Lago de Fogo purificados!';
+    document.getElementById('result-stats').innerHTML = 'O <strong>Guardião Supremo das Árvores</strong> foi derrotado.<br>A glória dos Didalmianos ecoa por todo o novo mundo!';
     document.getElementById('btn-next-stage').classList.add('hidden');
     screenResult.classList.remove('hidden');
   }
