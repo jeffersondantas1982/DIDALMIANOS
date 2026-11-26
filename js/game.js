@@ -597,6 +597,8 @@ window.Jogo.Game = (function () {
     const j = document.querySelector('#touch-controls [data-key="jump"]');
     if (j) j.textContent = rpg ? '✋' : '▲';
     document.getElementById('btn-restart-stage').textContent = rpg ? '↻ Recomeçar aventura' : '↻ Reiniciar Fase';
+    const pBtn = document.getElementById('btn-rpg-portal');
+    if (pBtn) pBtn.classList.toggle('hidden', !rpg);
   }
 
   function startRpg() {
@@ -769,6 +771,10 @@ window.Jogo.Game = (function () {
     document.getElementById('btn-pause').addEventListener('click', pauseGame);
     document.getElementById('btn-mute').addEventListener('click', toggleMute);
     document.getElementById('btn-resume').addEventListener('click', resumeGame);
+    document.getElementById('btn-rpg-portal').addEventListener('click', () => {
+      resumeGame();
+      RPG.openTravel();
+    });
     document.getElementById('btn-restart-stage').addEventListener('click', () => (mode === 'rpg' ? restartRpg() : loadStage(currentStageNum)));
     document.getElementById('btn-quit-menu').addEventListener('click', () => {
       leaveRpg();

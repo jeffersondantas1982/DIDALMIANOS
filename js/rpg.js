@@ -77,12 +77,7 @@ window.Jogo.RPG = (function () {
   function mk() { return document.createElement('canvas'); }
 
   function isActUnlocked(n) {
-    if (n === 1) return true;
-    if (n === 2) return !!(flags.act2Unlocked || flags.final);
-    if (n === 3) return !!(flags.act3Unlocked || flags.towerBoss);
-    if (n === 4) return !!(flags.act4Unlocked || flags.bermudaBoss);
-    if (n === 5) return !!(flags.act5Unlocked || flags.legendBoss);
-    return false;
+    return n >= 1 && n <= 5;
   }
 
   function tileAt(tx, ty) {
@@ -583,6 +578,8 @@ window.Jogo.RPG = (function () {
     }
 
     const spPos = spawnPos || ACT_META[act].spawn;
+    // Portal Arcano dos 5 Atos perto da entrada de cada Ato
+    props.push({ kind: 'portal', x: 25 * T + 16, y: 42 * T + 16, solid: false, rect: { x: 0, y: 0, w: 0, h: 0 } });
     P.x = spPos.x; P.y = spPos.y;
     if (blocked(P.x, P.y, P.hw, P.hh)) { P.x = ACT_META[act].spawn.x; P.y = ACT_META[act].spawn.y; }
     buildMini();
@@ -860,9 +857,13 @@ window.Jogo.RPG = (function () {
         return done ? p.name + ' (Ativada ✓)' : '[Espaço] Ativar ' + p.name;
       }
     }
+    const portal = props.find((p) => p.kind === 'portal');
+    if (portal && dist(P.x, P.y, portal.x, portal.y) < 46) {
+      return '[Espaço] Portal dos Atos (1–5)';
+    }
     const boat = props.find((p) => p.kind === 'boat');
     if (boat && dist(P.x, P.y, boat.x + 20, boat.y + 12) < 58) {
-      return isActUnlocked(2) ? '[Espaço] Mapa de Viagem (Atos 1–5)' : 'Barca trancada (Conclua o Ato 1)';
+      return '[Espaço] Barca / Mapa de Viagem (Atos 1–5)';
     }
     const altar = props[0];
     if (altar && dist(P.x, P.y, altar.x + 48, altar.y + 80) < 100) {
@@ -902,10 +903,15 @@ window.Jogo.RPG = (function () {
       if (dist(fx, fy, s.x * T + 16, s.y * T + 16) < 28) { say('Placa', [s.text]); return true; }
     }
 
+    const portal = props.find((p) => p.kind === 'portal');
+    if (portal && dist(P.x, P.y, portal.x, portal.y) < 46) {
+      openTravel();
+      return true;
+    }
+
     const boat = props.find((p) => p.kind === 'boat');
     if (boat && dist(P.x, P.y, boat.x + 20, boat.y + 12) < 58) {
-      if (isActUnlocked(2)) { openTravel(); }
-      else { say('Barca Arcana', ['As correntes marítimas estão furiosas. Purifique primeiro a Árvore Ancestral ao norte (Ato 1)!']); }
+      openTravel();
       return true;
     }
 
@@ -1586,6 +1592,23 @@ window.Jogo.RPG = (function () {
       c.fillStyle = '#facc15'; c.fillRect(x + 14, y + 13, 4, 6);
     }
 
+    // Portal Arcano dos 5 Atos
+    const portal = props.find((p) => p.kind === 'portal');
+    if (portal) {
+      const px = portal.x - camX; const py = portal.y - camY;
+      if (px > -60 && px < VW + 60 && py > -60 && py < VH + 60) {
+        c.save();
+        const pg = c.createRadialGradient(px, py, 4, px, py, 28);
+        pg.addColorStop(0, '#fde047'); pg.addColorStop(0.5, '#a855f7'); pg.addColorStop(1, 'rgba(168,85,247,0)');
+        c.fillStyle = pg; c.beginPath(); c.arc(px, py, 28, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = '#fde047'; c.lineWidth = 2;
+        c.beginPath(); c.arc(px, py, 16 + Math.sin(time * 5) * 2, time * 2, time * 2 + Math.PI * 1.5); c.stroke();
+        c.fillStyle = '#fde047'; c.font = 'bold 10px Segoe UI, sans-serif'; c.textAlign = 'center';
+        c.fillText('PORTAL', px, py - 24); c.textAlign = 'left';
+        c.restore();
+      }
+    }
+
     const boat = props.find((p) => p.kind === 'boat');
     if (boat) {
       const x = boat.x - camX; const y = boat.y - camY + Math.sin(time * 3) * 2;
@@ -1849,7 +1872,7 @@ window.Jogo.RPG = (function () {
   function init(e) { env = e; }
 
   return {
-    init, start, stop, restart, update, draw, setPaused,
+    init, start, stop, restart, update, draw, setPaused, openTravel,
     isActive: () => active,
     hasSave: (id) => !!localStorage.getItem('rpg_save_' + id)
   };
