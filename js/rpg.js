@@ -1,7 +1,7 @@
 window.Jogo = window.Jogo || {};
 
 /* =====================================================================
-   MODO RPG (estilo Zelda) - visao de cima, mundo aberto, bosses, baus,
+   MODO RPG (Mundo Aberto) - visao de cima, chefes, baus,
    chaves, NPCs, dialogos, minimapa e save automatico.
    ===================================================================== */
 window.Jogo.RPG = (function () {
