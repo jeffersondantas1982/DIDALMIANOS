@@ -450,7 +450,7 @@ body {
 
 /* Touch Controls */
 .touch-controls {
-  display: flex;
+  display: none;
   justify-content: space-between;
   padding: 4px 6px;
 }
@@ -480,11 +480,11 @@ body {
     grid-template-columns: 1fr;
   }
   .touch-controls {
-    display: flex !important;
+    display: none;
   }
 }
 
-/* Seleção de personagem */
+/* Selecao de personagem */
 .chars-card { max-width: 700px; }
 .chars-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px; }
 .char-card {
@@ -498,3 +498,71 @@ body {
 .char-card .c-title { font-size: 12px; color: #86efac; margin-bottom: 4px; }
 .char-card .c-desc { font-size: 12px; color: #cbd5e1; line-height: 1.4; margin-bottom: 6px; }
 .char-card .c-stats { font-size: 12px; color: var(--gold-light); font-weight: 700; }
+
+/* ================= MOBILE / TOUCH ================= */
+html, body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.overlay-screen { overflow-y: auto; }
+.title-card, .stages-card, .modal-card { margin: auto; }
+#rotate-hint {
+  display: none; position: fixed; inset: 0; z-index: 100; background: #0b131e;
+  color: #f8fafc; text-align: center; align-items: center; justify-content: center; flex-direction: column; padding: 24px; font-size: 18px;
+}
+#rotate-hint .rotate-icon { font-size: 64px; margin-bottom: 14px; }
+@media (orientation: portrait) and (pointer: coarse) { #rotate-hint { display: flex; } }
+
+@media (pointer: coarse) {
+  body { align-items: flex-start; }
+  #game-shell { width: 100vw; max-width: none; padding: 4px; gap: 4px; }
+  #canvas-wrap {
+    width: auto; max-width: 100%; margin: 0 auto;
+    height: calc(100dvh - 76px); aspect-ratio: 16 / 9; border-radius: 8px;
+  }
+  .touch-controls {
+    display: none; position: fixed; left: 0; right: 0; bottom: max(10px, env(safe-area-inset-bottom));
+    padding: 0 max(14px, env(safe-area-inset-left)); z-index: 50; pointer-events: none; align-items: flex-end;
+  }
+  body.playing .touch-controls { display: flex; }
+  .touch-dpad, .touch-actions { pointer-events: none; }
+  .touch-controls button {
+    pointer-events: auto; touch-action: none; width: 66px; height: 66px; border-radius: 50%;
+    background: rgba(15, 23, 34, 0.55); border: 2px solid rgba(234, 179, 8, 0.8);
+    font-size: 24px; backdrop-filter: blur(2px);
+  }
+  .touch-controls button:active { background: rgba(234, 179, 8, 0.45); }
+  .touch-dpad { gap: 14px; }
+  .touch-dpad button { width: 78px; height: 78px; border-radius: 22px; }
+  .touch-actions { display: grid; grid-template-columns: 66px 66px; gap: 8px; }
+  .icon-btn { width: 36px; height: 32px; }
+}
+
+@media (max-height: 520px) {
+  #hud { padding: 3px 8px; gap: 6px; border-radius: 10px; border-width: 1.5px; }
+  .portrait-frame { width: 40px; height: 40px; border-width: 2px; }
+  .vitals-group { min-width: 150px; gap: 2px; }
+  .hp-bar-bg { height: 15px; }
+  .hp-text { font-size: 10px; }
+  .heart-icon { font-size: 14px; }
+  .exp-bar-bg { height: 11px; }
+  .exp-text { font-size: 8px; }
+  .lv-badge { font-size: 10px; padding: 0 6px; }
+  .stage-title { font-size: 11px; }
+  .spheres-counter { font-size: 10px; padding: 0 8px; }
+  .stats-card { font-size: 10px; padding: 2px 6px; min-width: 70px; }
+  .hud-actions { flex-direction: row; }
+  .title-card, .stages-card, .modal-card { padding: 12px 18px; }
+  .title-card h1 { font-size: 28px; }
+  .title-card h2 { font-size: 13px; margin: 2px 0 6px; }
+  .lore-desc, .controls-hint, .lore-tag { display: none; }
+  .menu-buttons { margin-bottom: 6px; }
+  .btn-primary, .btn-secondary { padding: 8px 14px; font-size: 13px; }
+  .stages-grid { max-height: 190px; }
+  .chars-card { max-width: 640px; }
+  .char-card { padding: 6px; }
+  .char-card canvas { max-width: 110px; }
+  .char-card .c-desc { display: none; }
+  .char-card h3 { font-size: 14px; }
+  .stages-card h2 { font-size: 16px; margin-bottom: 6px; }
+}
+@media (pointer: coarse) and (max-height: 520px) {
+  #canvas-wrap { height: calc(100dvh - 60px); }
+}

@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b131e" />
   <title>Nícolas, o Didalmiano — Crônicas das Árvores de Arcano</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -70,6 +73,7 @@
           <div class="menu-buttons">
             <button id="btn-play" class="btn-primary">▶ Jogar Campanha (10 Fases)</button>
             <button id="btn-select-stage" class="btn-secondary">🗺 Selecionar Fase</button>
+            <button id="btn-fullscreen" class="btn-secondary">⛶ Tela Cheia</button>
           </div>
           <div class="controls-hint">
             <span><strong>A / D</strong> ou <strong>← / →</strong> Mover</span>
@@ -130,7 +134,7 @@
     </main>
 
     <!-- Controles Touch para Mobile/Tablet (oculto em desktop grande se não usado) -->
-    <div id="touch-controls" class="touch-controls hidden">
+    <div id="touch-controls" class="touch-controls">
       <div class="touch-dpad">
         <button data-key="left">◀</button>
         <button data-key="right">▶</button>
@@ -142,6 +146,11 @@
         <button data-key="jump">▲</button>
       </div>
     </div>
+  </div>
+
+  <div id="rotate-hint">
+    <div class="rotate-icon">📱↻</div>
+    <p>Gire o celular para o modo <strong>horizontal</strong> para jogar</p>
   </div>
 
   <script src="js/audio.js" defer></script>

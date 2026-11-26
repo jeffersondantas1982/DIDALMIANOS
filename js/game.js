@@ -97,6 +97,10 @@ window.Jogo.Game = (function () {
         e.preventDefault();
         keys[code] = false;
       });
+      btn.addEventListener('touchcancel', () => {
+        keys[code] = false;
+      });
+      btn.addEventListener('contextmenu', (e) => e.preventDefault());
     });
   }
 
@@ -529,6 +533,11 @@ window.Jogo.Game = (function () {
     const dt = Math.min(0.05, (ts - lastFrame) / 1000 || 0.016);
     lastFrame = ts;
 
+    document.body.classList.toggle('playing', state === 'playing');
+    if (state === 'playing' && window.matchMedia('(orientation: portrait) and (pointer: coarse)').matches) {
+      pauseGame();
+    }
+
     if (state === 'title') {
       elapsedTime += dt;
     }
@@ -611,6 +620,19 @@ window.Jogo.Game = (function () {
       screenChars.classList.remove('hidden');
     }
 
+    document.getElementById('btn-fullscreen').addEventListener('click', () => {
+      const el = document.documentElement;
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+        return;
+      }
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) {
+        Promise.resolve(req.call(el))
+          .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+          .catch(() => {});
+      }
+    });
     document.getElementById('btn-play').addEventListener('click', () => openChars('play'));
     document.getElementById('btn-select-stage').addEventListener('click', () => openChars('stages'));
     document.getElementById('btn-chars-back').addEventListener('click', () => {
