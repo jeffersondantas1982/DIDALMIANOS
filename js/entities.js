@@ -91,7 +91,11 @@ window.Jogo.Entities = (function () {
   }
 
   class Enemy {
-    constructor(cfg) {
+    constructor(cfg, diff = 'normal') {
+      const mHp = diff === 'hard' ? (cfg.isBoss ? 2.1 : 1.45) : diff === 'easy' ? 0.75 : 1;
+      const mDmg = diff === 'hard' ? (cfg.isBoss ? 1.65 : 1.35) : diff === 'easy' ? 0.75 : 1;
+      const mSpd = diff === 'hard' ? 1.32 : diff === 'easy' ? 0.82 : 1;
+      this.diff = diff;
       this.type = cfg.type || 'slime';
       this.x = cfg.x;
       this.y = cfg.y;
@@ -101,17 +105,23 @@ window.Jogo.Entities = (function () {
       this.name = cfg.name || '';
       this.minX = cfg.minX ?? cfg.x - 90;
       this.maxX = cfg.maxX ?? cfg.x + 90;
-      this.speed = cfg.speed || (this.isBoss ? 110 : 75);
+      this.speed = Math.round((cfg.speed || (this.isBoss ? 110 : 75)) * mSpd);
       this.dir = 1;
-      this.hp = cfg.hp || (this.isBoss ? 220 : 30);
+      this.hp = Math.round((cfg.hp || (this.isBoss ? 220 : 30)) * mHp);
       this.maxHp = this.hp;
-      this.dmg = cfg.dmg || (this.isBoss ? 22 : 14);
+      this.dmg = Math.round((cfg.dmg || (this.isBoss ? 22 : 14)) * mDmg);
       this.expValue = cfg.exp || (this.isBoss ? 120 : 22);
-      this.shootTimer = this.isBoss ? 1.8 : (this.type === 'turret' ? 2.2 : 999);
+      this.shootTimer = this.isBoss ? 1.6 : (this.type === 'turret' ? 2.2 : 999);
       this.hitFlash = 0;
       this.dead = false;
       this.baseY = cfg.y;
       this.phase = Math.random() * Math.PI * 2;
+      // IA astuta de chefe (guard -> telegraph -> lunge/volley -> vulnerable)
+      this.bossState = 'evade';
+      this.bossTimer = 1.8;
+      this.bossCycle = 0;
+      this.shielded = this.isBoss;
+      this.vulnerable = false;
     }
 
     update(dt, player, projectiles, time) {
@@ -126,12 +136,12 @@ window.Jogo.Entities = (function () {
         this.dir = player.x < this.x ? -1 : 1;
         this.shootTimer -= dt;
         if (this.shootTimer <= 0 && Math.abs(player.x - this.x) < 480) {
-          this.shootTimer = 2.1;
+          this.shootTimer = this.diff === 'hard' ? 1.45 : this.diff === 'easy' ? 2.6 : 2.1;
           projectiles.push(
             new Projectile(
               this.x + (this.dir > 0 ? this.w : -14),
               this.y + 12,
-              this.dir * 270,
+              this.dir * (this.diff === 'hard' ? 340 : 270),
               0,
               false,
               this.dmg,
@@ -139,25 +149,71 @@ window.Jogo.Entities = (function () {
             )
           );
         }
+      } else if (this.isBoss) {
+        this.bossTimer -= dt;
+        const aimDir = player.x < this.x ? -1 : 1;
+        const distX = Math.abs(player.x - this.x);
+
+        if (this.bossState === 'evade') {
+          // Mantem distancia astuta e salta se o jogador chegar muito perto
+          this.shielded = true;
+          this.vulnerable = false;
+          const wantDir = distX < 170 ? -aimDir : aimDir;
+          this.x += wantDir * this.speed * 1.15 * dt;
+          this.y = this.baseY - Math.abs(Math.sin(time * 4.5)) * 22;
+          if (this.x < this.minX) this.x = this.minX;
+          if (this.x > this.maxX) this.x = this.maxX;
+          if (this.bossTimer <= 0 && distX < 680) {
+            this.bossState = 'telegraph';
+            this.bossTimer = this.diff === 'hard' ? 0.45 : 0.65;
+            this.y = this.baseY;
+          }
+        } else if (this.bossState === 'telegraph') {
+          this.shielded = true;
+          if (this.bossTimer <= 0) {
+            this.bossState = this.bossCycle % 2 === 0 ? 'lunge' : 'volley';
+            this.bossCycle++;
+            this.dir = aimDir;
+            this.bossTimer = this.bossState === 'lunge' ? 0.55 : 0.4;
+            if (this.bossState === 'volley') {
+              const shots = this.diff === 'hard' ? [-85, -35, 0, 35, 85] : [-45, 0, 45];
+              shots.forEach((vy) => {
+                projectiles.push(new Projectile(this.x + this.w / 2, this.y + 28, aimDir * (this.diff === 'hard' ? 370 : 300), vy, false, this.dmg, '#a855f7'));
+              });
+            }
+          }
+        } else if (this.bossState === 'lunge') {
+          this.x += this.dir * this.speed * 2.9 * dt;
+          if (this.x < this.minX) this.x = this.minX;
+          if (this.x > this.maxX) this.x = this.maxX;
+          if (this.bossTimer <= 0) {
+            this.bossState = 'vulnerable';
+            this.shielded = false;
+            this.vulnerable = true;
+            this.bossTimer = this.diff === 'hard' ? 0.85 : this.diff === 'easy' ? 1.7 : 1.25;
+          }
+        } else if (this.bossState === 'volley') {
+          if (this.bossTimer <= 0) {
+            this.bossState = 'vulnerable';
+            this.shielded = false;
+            this.vulnerable = true;
+            this.bossTimer = this.diff === 'hard' ? 0.85 : this.diff === 'easy' ? 1.7 : 1.25;
+          }
+        } else if (this.bossState === 'vulnerable') {
+          this.shielded = false;
+          this.vulnerable = true;
+          this.y = this.baseY;
+          if (this.bossTimer <= 0) {
+            this.bossState = 'evade';
+            this.shielded = true;
+            this.vulnerable = false;
+            this.bossTimer = this.diff === 'hard' ? 1.1 : this.diff === 'easy' ? 2.1 : 1.6;
+          }
+        }
       } else {
-        // Walker ou Boss
         this.x += this.dir * this.speed * dt;
         if (this.x < this.minX) this.dir = 1;
         if (this.x > this.maxX) this.dir = -1;
-
-        if (this.isBoss) {
-          this.shootTimer -= dt;
-          if (this.shootTimer <= 0 && Math.abs(player.x - this.x) < 620) {
-            this.shootTimer = 1.65;
-            const aimDir = player.x < this.x ? -1 : 1;
-            projectiles.push(
-              new Projectile(this.x + this.w / 2, this.y + 24, aimDir * 300, -30, false, this.dmg, '#a855f7')
-            );
-            projectiles.push(
-              new Projectile(this.x + this.w / 2, this.y + 38, aimDir * 280, 35, false, this.dmg, '#f43f5e')
-            );
-          }
-        }
       }
     }
 
@@ -190,11 +246,22 @@ window.Jogo.Entities = (function () {
         ctx.fillRect(x + 16, this.y + 20, 12, 8);
         ctx.fillRect(x + this.w - 28, this.y + 20, 12, 8);
 
-        // Barra de vida do Chefe
+        // Barra de vida + estado tatico do Chefe
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(x, this.y - 26, this.w, 8);
-        ctx.fillStyle = '#ef4444';
+        ctx.fillStyle = this.vulnerable ? '#fde047' : '#ef4444';
         ctx.fillRect(x, this.y - 26, this.w * Math.max(0, this.hp / this.maxHp), 8);
+        if (this.shielded) {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(x + this.w / 2, this.y + this.h / 2, this.w * 0.72, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (this.vulnerable) {
+          ctx.fillStyle = '#fde047';
+          ctx.font = 'bold 11px Segoe UI, sans-serif';
+          ctx.fillText('ABERTURA!', x + 4, this.y - 32);
+        }
       } else if (this.type === 'flyer') {
         // Espírito Voador
         ctx.fillStyle = '#0ea5e9';

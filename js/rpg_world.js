@@ -1,7 +1,11 @@
 window.Jogo = window.Jogo || {};
 
 /* =====================================================================
-   MUNDOS, LOJA, CHEFES E HISTORIA DO MODO RPG (ATO 1 E ATO 2)
+   MUNDOS, LOJA, CHEFES E HISTORIA DO MODO RPG (ATOS 1, 2, 3 E 4)
+   Ato 1: Continente das Arvores
+   Ato 2: Torre no Mar
+   Ato 3: Triangulo das Bermudas (Onde nascem os Didalmianos)
+   Ato 4: A Lenda das Esferas (Santuario Primordial)
    ===================================================================== */
 window.Jogo.RPGWorld = (function () {
   const MW = 64;
@@ -61,7 +65,6 @@ window.Jogo.RPGWorld = (function () {
       }
     }
 
-    // Lagos e litoral sul (mar para a Torre no Mar)
     rect(46, 6, 13, 12, WATER);
     rect(5, 5, 6, 5, WATER);
     rect(0, 0, MW, 2, TREE);
@@ -79,8 +82,6 @@ window.Jogo.RPGWorld = (function () {
     rect(34, 38, 6, 2, HWALL);
     set(36, 39, DOOR);
     rect(31, 23, 3, 17, PATH);
-
-    // Cais Sul da Vila (Barca para o Ato 2)
     rect(31, 44, 3, 3, DOCK);
 
     // Oeste: Floresta da Brisa
@@ -97,11 +98,8 @@ window.Jogo.RPGWorld = (function () {
     rect(47, 25, 2, 2, SWATER);
     rect(55, 30, 3, 2, SWATER);
     rect(54, 36, 6, 2, PATH);
-    set(43, 41, GATE);
-    set(43, 42, GATE);
-    set(43, 43, GATE);
+    set(43, 41, GATE); set(43, 42, GATE); set(43, 43, GATE);
 
-    // Campina
     rect(22, 27, 5, 3, GRASS);
     rect(34, 29, 3, 3, GRASS);
 
@@ -109,9 +107,7 @@ window.Jogo.RPGWorld = (function () {
     rect(20, 11, 25, 12, WALL);
     rect(21, 12, 23, 10, FLOOR);
     [24, 28, 36, 40].forEach((x) => [14, 19].forEach((y) => set(x, y, WALL)));
-    set(31, 22, GATE);
-    set(32, 22, GATE);
-    set(33, 22, GATE);
+    set(31, 22, GATE); set(32, 22, GATE); set(33, 22, GATE);
 
     // Arena da Arvore Ancestral
     rect(22, 0, 21, 11, WALL);
@@ -127,14 +123,13 @@ window.Jogo.RPGWorld = (function () {
     const { set, rect } = makeHelpers(m);
     const { GRASS, PATH, WATER, TREE, ROCK, WALL, FLOOR, FLOWER, BUSH, GATE, DOCK } = TILE;
 
-    // Oceano aberto
     rect(0, 0, MW, MH, WATER);
 
     // Ilha do Cais (Sul)
     rect(25, 36, 15, 9, GRASS);
     rect(26, 37, 13, 7, PATH);
-    rect(31, 43, 3, 3, DOCK); // Retorno ao Ato 1
-    rect(31, 22, 3, 16, DOCK); // Ponte central para a Torre
+    rect(31, 43, 3, 3, DOCK);
+    rect(31, 22, 3, 16, DOCK);
 
     // Ponte Oeste -> Ilha da Tempestade
     rect(15, 39, 12, 3, DOCK);
@@ -147,7 +142,7 @@ window.Jogo.RPGWorld = (function () {
         else if (r < 0.28) set(x, y, FLOWER);
       }
     }
-    rect(8, 27, 9, 8, FLOOR); // Arena da Arvore da Tempestade
+    rect(8, 27, 9, 8, FLOOR);
     rect(11, 35, 3, 7, PATH);
 
     // Ponte Leste -> Ilha da Mare
@@ -161,20 +156,123 @@ window.Jogo.RPGWorld = (function () {
         else if (r < 0.28) set(x, y, FLOWER);
       }
     }
-    rect(48, 27, 9, 8, FLOOR); // Arena da Arvore da Mare
+    rect(48, 27, 9, 8, FLOOR);
     rect(51, 35, 3, 7, PATH);
 
-    // Cidadela da Torre no Mar (Centro-Norte)
+    // Cidadela da Torre no Mar
     rect(21, 11, 23, 12, WALL);
     rect(22, 12, 21, 10, FLOOR);
     [25, 29, 35, 39].forEach((x) => [14, 19].forEach((y) => set(x, y, WALL)));
-    set(31, 22, GATE);
-    set(32, 22, GATE);
-    set(33, 22, GATE);
+    set(31, 22, GATE); set(32, 22, GATE); set(33, 22, GATE);
 
-    // Camara do Nucleo das Esferas (Extremo Norte)
     rect(22, 1, 21, 10, WALL);
     rect(24, 2, 17, 8, FLOOR);
+    rect(31, 10, 3, 2, FLOOR);
+
+    return m;
+  }
+
+  /* -------------- ATO 3: TRIANGULO DAS BERMUDAS -------------- */
+  function buildAct3() {
+    const m = new Uint8Array(MW * MH);
+    const { set, rect } = makeHelpers(m);
+    const { GRASS, PATH, WATER, ROCK, WALL, FLOOR, FLOWER, MUD, BUSH, GATE, DEAD, DOCK } = TILE;
+
+    // Mar turquesa mistico do Triangulo
+    rect(0, 0, MW, MH, WATER);
+
+    // Base Sul (Ilha do Vortice - chegada)
+    rect(24, 36, 17, 9, MUD);
+    rect(26, 37, 13, 7, FLOOR);
+    rect(31, 43, 3, 3, DOCK); // Barca (voltar / avancar)
+
+    // Pontes formando um triangulo no mar!
+    rect(15, 38, 12, 3, DOCK); // Sul -> Vertice Oeste
+    rect(39, 38, 12, 3, DOCK); // Sul -> Vertice Leste
+    rect(31, 21, 3, 17, DOCK); // Centro -> Vertice Norte
+
+    // Vertice Oeste: Ilha da Nevoa (Naufragios)
+    rect(4, 25, 16, 17, MUD);
+    for (let y = 26; y < 41; y++) {
+      for (let x = 5; x < 19; x++) {
+        const r = rnd(x + 310, y + 17);
+        if (r < 0.14) set(x, y, DEAD);
+        else if (r < 0.22) set(x, y, ROCK);
+        else if (r < 0.28) set(x, y, BUSH);
+      }
+    }
+    rect(7, 28, 9, 8, FLOOR);
+    rect(11, 36, 3, 5, PATH);
+
+    // Vertice Leste: Ilha da Bussola (Abismo)
+    rect(45, 25, 16, 17, GRASS);
+    for (let y = 26; y < 41; y++) {
+      for (let x = 46; x < 60; x++) {
+        const r = rnd(x + 410, y + 33);
+        if (r < 0.14) set(x, y, ROCK);
+        else if (r < 0.22) set(x, y, BUSH);
+        else if (r < 0.28) set(x, y, FLOWER);
+      }
+    }
+    rect(48, 28, 9, 8, FLOOR);
+    rect(51, 36, 3, 5, PATH);
+
+    // Vertice Norte: Santuario do Berco Didalmiano
+    rect(20, 11, 25, 11, WALL);
+    rect(21, 12, 23, 9, FLOOR);
+    [25, 39].forEach((x) => [14, 18].forEach((y) => set(x, y, WALL)));
+    set(31, 21, GATE); set(32, 21, GATE); set(33, 21, GATE);
+
+    // Camara do Vortice Primordial (Topo do Triangulo)
+    rect(22, 1, 21, 10, WALL);
+    rect(24, 2, 17, 8, FLOOR);
+    rect(31, 10, 3, 2, FLOOR);
+
+    return m;
+  }
+
+  /* -------------- ATO 4: A LENDA DAS ESFERAS -------------- */
+  function buildAct4() {
+    const m = new Uint8Array(MW * MH);
+    const { set, rect } = makeHelpers(m);
+    const { PATH, WATER, WALL, FLOOR, BUSH, GATE, DOCK } = TILE;
+
+    // Mar Estelar / Abismo de Energia
+    rect(0, 0, MW, MH, WATER);
+
+    // Salao de Entrada (Sul)
+    rect(24, 36, 17, 9, WALL);
+    rect(25, 37, 15, 7, FLOOR);
+    rect(31, 43, 3, 3, DOCK); // Portal de retorno
+
+    // Passarelas de Luz
+    rect(15, 39, 11, 3, PATH);
+    rect(39, 39, 11, 3, PATH);
+    rect(31, 22, 3, 16, PATH);
+
+    // Ala Oeste: Camara da Esfera Solar
+    rect(5, 24, 15, 18, WALL);
+    rect(6, 25, 13, 16, FLOOR);
+    set(19, 39, FLOOR); set(19, 40, FLOOR); set(19, 41, FLOOR);
+    [9, 15].forEach((x) => [28, 36].forEach((y) => set(x, y, WALL)));
+    set(8, 39, BUSH); set(16, 39, BUSH);
+
+    // Ala Leste: Camara da Esfera Astral
+    rect(45, 24, 15, 18, WALL);
+    rect(46, 25, 13, 16, FLOOR);
+    set(45, 39, FLOOR); set(45, 40, FLOOR); set(45, 41, FLOOR);
+    [49, 55].forEach((x) => [28, 36].forEach((y) => set(x, y, WALL)));
+    set(48, 39, BUSH); set(56, 39, BUSH);
+
+    // Antecamara das Lendas (Centro-Norte)
+    rect(20, 11, 25, 12, WALL);
+    rect(21, 12, 23, 10, FLOOR);
+    [24, 29, 35, 40].forEach((x) => [15, 19].forEach((y) => set(x, y, WALL)));
+    set(31, 22, GATE); set(32, 22, GATE); set(33, 22, GATE);
+
+    // Trono da Lenda das Esferas (Norte)
+    rect(21, 1, 23, 10, WALL);
+    rect(23, 2, 19, 8, FLOOR);
     rect(31, 10, 3, 2, FLOOR);
 
     return m;
@@ -186,7 +284,10 @@ window.Jogo.RPGWorld = (function () {
     knight: { hp: 48, dmg: 18, speed: 44, exp: 30, size: 26 },
     sentinel: { hp: 30, dmg: 11, speed: 0, exp: 22, size: 24 },
     stormling: { hp: 52, dmg: 18, speed: 108, exp: 38, size: 22, fly: true },
-    corsair: { hp: 72, dmg: 22, speed: 56, exp: 48, size: 26 }
+    corsair: { hp: 72, dmg: 22, speed: 56, exp: 48, size: 26 },
+    phantom: { hp: 85, dmg: 25, speed: 115, exp: 60, size: 24, fly: true },
+    golem: { hp: 115, dmg: 28, speed: 52, exp: 75, size: 28 },
+    seabeast: { hp: 110, dmg: 26, speed: 92, exp: 80, size: 32, swim: true }
   };
 
   const BOSS_DEF = {
@@ -194,27 +295,36 @@ window.Jogo.RPGWorld = (function () {
     boss2: { name: 'Guardião do Pântano', hp: 280, color: '#84cc16', dmg: 18, speed: 58, patterns: ['ring', 'summon'], exp: 160, orb: 'Pântano', act: 1 },
     boss3: { name: 'Guardião da Forja', hp: 340, color: '#f97316', dmg: 20, speed: 68, patterns: ['dash', 'ring', 'fan'], exp: 220, orb: 'Forja', act: 1 },
     final: { name: 'Guardião do Cataclisma', hp: 500, color: '#a855f7', dmg: 23, speed: 74, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 400, orb: 'Cataclisma', act: 1 },
+
     stormBoss: { name: 'Guardião da Tempestade', hp: 420, color: '#38bdf8', dmg: 22, speed: 78, patterns: ['dash', 'fan', 'ring'], exp: 280, orb: 'Tempestade', act: 2 },
     tideBoss: { name: 'Guardião da Maré', hp: 460, color: '#06b6d4', dmg: 24, speed: 66, patterns: ['ring', 'summon', 'fan'], exp: 320, orb: 'Maré', act: 2 },
-    towerBoss: { name: 'Soberano das Esferas', hp: 680, color: '#facc15', dmg: 27, speed: 82, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 600, orb: 'Torre no Mar', act: 2 }
+    towerBoss: { name: 'Soberano das Esferas', hp: 640, color: '#facc15', dmg: 27, speed: 82, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 600, orb: 'Torre no Mar', act: 2 },
+
+    mistBoss: { name: 'Guardião da Névoa', hp: 560, color: '#2dd4bf', dmg: 26, speed: 84, patterns: ['dash', 'fan', 'ring'], exp: 380, orb: 'Névoa', act: 3 },
+    abyssBoss: { name: 'Guardião do Abismo', hp: 600, color: '#6366f1', dmg: 28, speed: 74, patterns: ['ring', 'summon', 'fan'], exp: 420, orb: 'Abismo', act: 3 },
+    bermudaBoss: { name: 'Vórtice das Bermudas', hp: 820, color: '#14b8a6', dmg: 30, speed: 86, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 800, orb: 'Triângulo', act: 3 },
+
+    solarBoss: { name: 'Guardião da Esfera Solar', hp: 720, color: '#f97316', dmg: 30, speed: 86, patterns: ['dash', 'ring', 'fan'], exp: 520, orb: 'Solar', act: 4 },
+    astralBoss: { name: 'Guardião da Esfera Astral', hp: 760, color: '#c084fc', dmg: 32, speed: 82, patterns: ['ring', 'summon', 'fan'], exp: 560, orb: 'Astral', act: 4 },
+    legendBoss: { name: 'Arquiteto das Esferas', hp: 1100, color: '#fde047', dmg: 35, speed: 92, patterns: ['fan', 'ring', 'dash', 'summon'], exp: 1500, orb: 'Lenda Primordial', act: 4 }
   };
 
   const SHOP_ITEMS = [
     { id: 'potion', name: 'Poção de Esfera', desc: 'Cura +60 HP ao usar (tecla Q)', cost: 6, max: 99 },
-    { id: 'weapon', name: 'Reforjar Arma', desc: '+5 ATQ permanente', cost: 15, max: 3 },
-    { id: 'armor', name: 'Manto Arcano', desc: '+4 DEF permanente', cost: 15, max: 3 },
-    { id: 'boots', name: 'Botas do Saci', desc: '+3 SPD permanente', cost: 12, max: 2 }
+    { id: 'weapon', name: 'Reforjar Arma', desc: '+5 ATQ permanente', cost: 15, max: 5 },
+    { id: 'armor', name: 'Manto Arcano', desc: '+4 DEF permanente', cost: 15, max: 5 },
+    { id: 'boots', name: 'Botas do Saci', desc: '+3 SPD permanente', cost: 12, max: 3 }
   ];
 
   const INTRO_LINES = (heroName, mateName) => [
     'Há eras, o Cataclisma rasgou a Terra. De cada conceito do mundo brotou uma Árvore de Arcano — e dela nasceram seus Guardiões.',
-    'Longe do continente, na Torre no Mar onde esferas mágicas se concentram, surgiram os Didalmianos: astutos, velozes e travessos como o Saci-Pererê.',
-    heroName + ' e ' + mateName + ' cruzaram o oceano até a Vila Didalmiana. Fale com o Ancião Nuvem, visite o Armeiro Bram e descubra o que corrompe as Árvores!'
+    'Do misterioso Triângulo das Bermudas e da Torre no Mar, onde esferas mágicas se concentram, surgiram os Didalmianos: astutos e travessos como o Saci-Pererê.',
+    heroName + ' e ' + mateName + ' chegaram à Vila Didalmiana. Fale com o Ancião Nuvem, visite o Armeiro Bram e comece a jornada pelos 4 Atos!'
   ];
 
   return {
     MW, MH, TILE, SOLID,
-    buildAct1, buildAct2,
+    buildAct1, buildAct2, buildAct3, buildAct4,
     ENEMY_DEF, BOSS_DEF, SHOP_ITEMS, INTRO_LINES
   };
 })();

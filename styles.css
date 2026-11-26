@@ -644,3 +644,20 @@ body.rpg-mode .touch-controls .touch-dpad button { width: 62px; height: 62px; bo
 .touch-dpad button[data-key="down"] { grid-area: down; }
 .touch-dpad button[data-key="left"] { grid-area: left; }
 .touch-dpad button[data-key="right"] { grid-area: right; }
+
+/* ===== DIFICULDADE E MUSICA ===== */
+.difficulty-bar, .music-bar {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 8px; margin-bottom: 12px;
+}
+.diff-label { font-size: 13px; font-weight: 700; color: var(--gold-light); }
+.diff-btn, .btn-mini {
+  background: #132030; color: #cbd5e1; border: 1.5px solid #475569;
+  border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.diff-btn:hover, .btn-mini:hover { border-color: var(--gold); transform: translateY(-1px); }
+.diff-btn.active { background: #1e3a5f; color: #fde047; border-color: var(--gold); box-shadow: 0 0 10px rgba(234,179,8,0.35); }
+.diff-btn[data-diff="hard"].active { background: #7f1d1d; color: #fecaca; border-color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.45); }
+.vol-wrap { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #cbd5e1; }
+.vol-wrap input[type="range"] { width: 96px; accent-color: var(--gold); cursor: pointer; }

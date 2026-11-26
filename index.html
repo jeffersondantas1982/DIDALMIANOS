@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b131e" />
   <title>Nícolas, o Didalmiano — Crônicas das Árvores de Arcano</title>
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
   <div id="game-shell">
@@ -66,11 +66,21 @@
         <div class="title-card">
           <div class="lore-tag">UNIVERSO DAS ÁRVORES DE ARCANO</div>
           <h1>DIDALMIANOS</h1>
-          <h2>Nícolas, o Pirata Armeiro &amp; Nicks, o Lanceiro das Chamas</h2>
+          <h2>Lex, o Pirata Armeiro &amp; Nícolas, o Lanceiro Armeiro</h2>
           <p class="lore-desc">
             Após o Cataclisma, cada conceito fez brotar uma <strong>Árvore de Arcano</strong> e seus Guardiões.
-            Da Torre no Mar, onde esferas mágicas se concentram, surge <strong>Nícolas</strong> — travesso como um Saci-Pererê, armado com lâminas gêmeas e pistola arcana.
+            Do Triângulo das Bermudas e da Torre no Mar surgem <strong>Lex</strong> (Pirata Armeiro) e <strong>Nícolas</strong> (Lanceiro Armeiro) — travessos como o Saci-Pererê!
           </p>
+          <div class="difficulty-bar">
+            <span class="diff-label">Dificuldade:</span>
+            <button class="diff-btn" data-diff="easy">Fácil</button>
+            <button class="diff-btn active" data-diff="normal">Regular</button>
+            <button class="diff-btn" data-diff="hard">Difícil</button>
+          </div>
+          <div class="music-bar">
+            <button id="btn-music-title" class="btn-mini">🎵 Música: Ligada</button>
+            <label class="vol-wrap">Vol <input id="slider-vol-title" type="range" min="0" max="100" value="35" /></label>
+          </div>
           <div class="menu-buttons">
             <button id="btn-play" class="btn-primary">▶ Jogar Campanha (10 Fases)</button>
             <button id="btn-rpg" class="btn-primary btn-rpg">🗡 Modo RPG (Mundo Aberto)</button>
@@ -102,7 +112,7 @@
       <!-- Seleção de Fases -->
       <div id="screen-stages" class="overlay-screen hidden">
         <div class="stages-card">
-          <h2>Jornada de Nícolas — 10 Fases</h2>
+          <h2>Jornada dos Didalmianos — 10 Fases</h2>
           <div id="stages-grid" class="stages-grid"></div>
           <button id="btn-back-title" class="btn-secondary">← Voltar</button>
         </div>
@@ -112,6 +122,14 @@
       <div id="screen-pause" class="overlay-screen hidden">
         <div class="modal-card">
           <h2>Jogo Pausado</h2>
+          <div class="music-bar">
+            <button id="btn-music-pause" class="btn-mini">🎵 Música: Ligada</button>
+            <label class="vol-wrap">Vol <input id="slider-vol-pause" type="range" min="0" max="100" value="35" /></label>
+          </div>
+          <div class="music-bar">
+            <button id="btn-music-pause" class="btn-mini">🎵 Música: Ligada</button>
+            <label class="vol-wrap">Vol <input id="slider-vol-pause" type="range" min="0" max="100" value="35" /></label>
+          </div>
           <div class="menu-buttons">
             <button id="btn-resume" class="btn-primary">▶ Continuar</button>
             <button id="btn-restart-stage" class="btn-secondary">↻ Reiniciar Fase</button>
@@ -158,13 +176,13 @@
     <p>Gire o celular para o modo <strong>horizontal</strong> para jogar</p>
   </div>
 
-  <script src="js/audio.js?v=4" defer></script>
-  <script src="js/characters.js?v=4" defer></script>
-  <script src="js/levels.js?v=4" defer></script>
-  <script src="js/renderer.js?v=4" defer></script>
-  <script src="js/entities.js?v=4" defer></script>
-  <script src="js/rpg_world.js?v=4" defer></script>
-  <script src="js/rpg.js?v=5" defer></script>
-  <script src="js/game.js?v=4" defer></script>
+  <script src="js/audio.js?v=7" defer></script>
+  <script src="js/characters.js?v=7" defer></script>
+  <script src="js/levels.js?v=7" defer></script>
+  <script src="js/renderer.js?v=7" defer></script>
+  <script src="js/entities.js?v=7" defer></script>
+  <script src="js/rpg_world.js?v=7" defer></script>
+  <script src="js/rpg.js?v=7" defer></script>
+  <script src="js/game.js?v=7" defer></script>
 </body>
 </html>

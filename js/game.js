@@ -36,6 +36,8 @@ window.Jogo.Game = (function () {
   let totalSpheres = Number(localStorage.getItem('nicolas_spheres') || 0);
   let selectedChar = localStorage.getItem('nicolas_char') || 'nicolas';
   if (!Chars[selectedChar]) selectedChar = 'nicolas';
+  let difficulty = localStorage.getItem('did_difficulty') || 'normal';
+  if (!['easy', 'normal', 'hard'].includes(difficulty)) difficulty = 'normal';
 
   function getSaved(id) {
     return JSON.parse(localStorage.getItem('nicolas_stats_' + id) || 'null') || { ...Chars[id].stats };
@@ -146,7 +148,7 @@ window.Jogo.Game = (function () {
     player = new Player(60, 360, { ...sv, hp: sv.maxHp });
     player.charId = selectedChar;
     Renderer.drawPortrait(document.getElementById('portrait-canvas'), selectedChar);
-    enemies = stageData.enemies.map((cfg) => new Enemy(cfg));
+    enemies = stageData.enemies.map((cfg) => new Enemy(cfg, difficulty));
     projectiles = [];
     particles = [];
     popups = [];
@@ -190,13 +192,23 @@ window.Jogo.Game = (function () {
   }
 
   function damageEnemy(enemy, dmg, knockDir) {
-    enemy.hp -= dmg;
+    let finalDmg = dmg;
+    if (enemy.isBoss) {
+      if (enemy.shielded) {
+        finalDmg = Math.max(1, Math.round(dmg * (difficulty === 'hard' ? 0.12 : 0.35)));
+        popups.push(new FloatingText(enemy.x + enemy.w / 2, enemy.y - 26, 'ESCUDO!', '#38bdf8'));
+      } else if (enemy.vulnerable) {
+        finalDmg = Math.round(dmg * 1.5);
+        popups.push(new FloatingText(enemy.x + enemy.w / 2, enemy.y - 26, 'CRÍTICO!', '#4ade80'));
+      }
+    }
+    enemy.hp -= finalDmg;
     enemy.hitFlash = 0.14;
     if (!enemy.isBoss && enemy.type !== 'turret') {
       enemy.x += knockDir * 12;
     }
-    popups.push(new FloatingText(enemy.x + enemy.w / 2, enemy.y - 10, `-${dmg}`, '#fde047'));
-    spawnBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#facc15', 7);
+    popups.push(new FloatingText(enemy.x + enemy.w / 2, enemy.y - 10, `-${finalDmg}`, '#fde047'));
+    spawnBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, enemy.isBoss && enemy.shielded ? '#38bdf8' : '#facc15', 7);
 
     if (enemy.hp <= 0) {
       enemy.dead = true;
@@ -615,9 +627,9 @@ window.Jogo.Game = (function () {
 
   function rpgWin() {
     state = 'result';
-    document.getElementById('result-title').textContent = '🏆 Atos 1 e 2 Concluídos!';
-    document.getElementById('result-subtitle').textContent = 'As Árvores de Arcano e a Torre no Mar foram purificadas!';
-    document.getElementById('result-stats').innerHTML = 'Você derrotou o <strong>Guardião do Cataclisma</strong> e o <strong>Soberano das Esferas</strong>!<br>A lenda dos Didalmianos continua em breve.';
+    document.getElementById('result-title').textContent = '🏆 A Lenda das Esferas Concluída!';
+    document.getElementById('result-subtitle').textContent = 'Você completou os 4 Atos: Continente, Torre no Mar, Triângulo das Bermudas e a Lenda das Esferas!';
+    document.getElementById('result-stats').innerHTML = 'O <strong>Arquiteto das Esferas</strong> reconheceu os Didalmianos.<br>As Árvores de Arcano e as Esferas Primordiais brilham em paz!';
     document.getElementById('btn-next-stage').classList.add('hidden');
     screenResult.classList.remove('hidden');
   }
@@ -699,6 +711,45 @@ window.Jogo.Game = (function () {
     document.getElementById('btn-play').addEventListener('click', () => openChars('play'));
     document.getElementById('btn-rpg').addEventListener('click', () => openChars('rpg'));
     document.getElementById('btn-rpg-pause').addEventListener('click', pauseGame);
+
+    // Dificuldade (Facil / Regular / Dificil)
+    const diffBtns = document.querySelectorAll('.diff-btn');
+    function syncDiffUI() {
+      diffBtns.forEach((b) => b.classList.toggle('active', b.dataset.diff === difficulty));
+    }
+    diffBtns.forEach((b) => {
+      b.addEventListener('click', () => {
+        difficulty = b.dataset.diff;
+        localStorage.setItem('did_difficulty', difficulty);
+        syncDiffUI();
+      });
+    });
+    syncDiffUI();
+
+    // Musica de aventura + volume (Menu Inicial e Pausa)
+    const musicBtns = [document.getElementById('btn-music-title'), document.getElementById('btn-music-pause')].filter(Boolean);
+    const volSliders = [document.getElementById('slider-vol-title'), document.getElementById('slider-vol-pause')].filter(Boolean);
+    function syncMusicUI() {
+      const on = Audio.isMusicEnabled();
+      const pct = Math.round(Audio.getMusicVolume() * 100);
+      musicBtns.forEach((b) => { b.textContent = on ? '🎵 Música: Ligada' : '🔇 Música: Desligada'; });
+      volSliders.forEach((s) => { s.value = String(pct); });
+    }
+    musicBtns.forEach((b) => {
+      b.addEventListener('click', () => {
+        Audio.toggleMusic();
+        Audio.startMusic();
+        syncMusicUI();
+      });
+    });
+    volSliders.forEach((s) => {
+      s.addEventListener('input', () => {
+        Audio.setMusicVolume(Number(s.value) / 100);
+        Audio.startMusic();
+        syncMusicUI();
+      });
+    });
+    syncMusicUI();
     document.getElementById('btn-select-stage').addEventListener('click', () => openChars('stages'));
     document.getElementById('btn-chars-back').addEventListener('click', () => {
       screenChars.classList.add('hidden');
@@ -753,6 +804,7 @@ window.Jogo.Game = (function () {
   function autoFullscreenOnce() {
     window.removeEventListener('pointerdown', autoFullscreenOnce, true);
     window.removeEventListener('keydown', autoFullscreenOnce, true);
+    Audio.startMusic();
     enterFullscreen();
   }
   window.addEventListener('pointerdown', autoFullscreenOnce, true);
@@ -765,7 +817,7 @@ window.Jogo.Game = (function () {
     else enterFullscreen();
   });
 
-  RPG.init({ ctx, isDown, isJust, Audio, Chars, onWin: rpgWin });
+  RPG.init({ ctx, isDown, isJust, Audio, Chars, onWin: rpgWin, getDifficulty: () => difficulty });
   bindInput();
   initUI();
   requestAnimationFrame(loop);
