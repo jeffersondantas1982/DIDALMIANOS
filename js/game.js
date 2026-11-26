@@ -80,14 +80,81 @@ window.Jogo.Game = (function () {
       keys[e.code] = false;
     });
 
-    // Touch controls
-    document.querySelectorAll('#touch-controls button').forEach((btn) => {
+    // Touch controls: D-pad circular com deslize continuo (sem precisar soltar o dedo)
+    const dpad = document.querySelector('#touch-controls .touch-dpad');
+    if (dpad) {
+      const dirBtns = {
+        ArrowUp: dpad.querySelector('[data-key="up"]'),
+        ArrowDown: dpad.querySelector('[data-key="down"]'),
+        ArrowLeft: dpad.querySelector('[data-key="left"]'),
+        ArrowRight: dpad.querySelector('[data-key="right"]')
+      };
+      const allDirs = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+      let activeDpadTouch = null;
+
+      function setDirs(next) {
+        allDirs.forEach((code) => {
+          const on = !!next[code];
+          if (on && !keys[code]) justPressed[code] = true;
+          keys[code] = on;
+          if (dirBtns[code]) dirBtns[code].classList.toggle('pressed', on);
+        });
+      }
+
+      function updateDpadFromTouch(touch) {
+        const rect = dpad.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const rotated = window.matchMedia('(orientation: portrait) and (pointer: coarse)').matches;
+        const gx = rotated ? (touch.clientY - cy) : (touch.clientX - cx);
+        const gy = rotated ? -(touch.clientX - cx) : (touch.clientY - cy);
+        const dead = 12;
+        const next = {};
+        if (gx < -dead) next.ArrowLeft = true;
+        if (gx > dead) next.ArrowRight = true;
+        if (mode === 'rpg') {
+          if (gy < -dead) next.ArrowUp = true;
+          if (gy > dead) next.ArrowDown = true;
+        }
+        setDirs(next);
+      }
+
+      dpad.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        activeDpadTouch = t.identifier;
+        updateDpadFromTouch(t);
+      }, { passive: false });
+
+      dpad.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (t.identifier === activeDpadTouch) {
+            updateDpadFromTouch(t);
+            break;
+          }
+        }
+      }, { passive: false });
+
+      function endDpad(e) {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === activeDpadTouch) {
+            activeDpadTouch = null;
+            setDirs({});
+            break;
+          }
+        }
+      }
+      dpad.addEventListener('touchend', (e) => { e.preventDefault(); endDpad(e); }, { passive: false });
+      dpad.addEventListener('touchcancel', (e) => { endDpad(e); });
+      dpad.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    // Touch controls: botoes de acao (lado direito)
+    document.querySelectorAll('#touch-controls .touch-actions button').forEach((btn) => {
       const action = btn.dataset.key;
       const map = {
-        up: 'ArrowUp',
-        down: 'ArrowDown',
-        left: 'ArrowLeft',
-        right: 'ArrowRight',
         jump: 'Space',
         attack: 'KeyJ',
         shoot: 'KeyL',
@@ -99,13 +166,16 @@ window.Jogo.Game = (function () {
         e.preventDefault();
         if (!keys[code]) justPressed[code] = true;
         keys[code] = true;
-      });
+        btn.classList.add('pressed');
+      }, { passive: false });
       btn.addEventListener('touchend', (e) => {
         e.preventDefault();
         keys[code] = false;
-      });
+        btn.classList.remove('pressed');
+      }, { passive: false });
       btn.addEventListener('touchcancel', () => {
         keys[code] = false;
+        btn.classList.remove('pressed');
       });
       btn.addEventListener('contextmenu', (e) => e.preventDefault());
     });

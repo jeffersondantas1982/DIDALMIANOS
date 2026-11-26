@@ -661,3 +661,33 @@ body.rpg-mode .touch-controls .touch-dpad button { width: 62px; height: 62px; bo
 .diff-btn[data-diff="hard"].active { background: #7f1d1d; color: #fecaca; border-color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.45); }
 .vol-wrap { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #cbd5e1; }
 .vol-wrap input[type="range"] { width: 96px; accent-color: var(--gold); cursor: pointer; }
+
+/* ===== TELA CHEIA TOTAL NO CELULAR (SEM BORDAS) ===== */
+@media (pointer: coarse) {
+  html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
+  #game-shell {
+    width: 100vw; height: 100dvh; max-width: none;
+    padding: 0 !important; gap: 0 !important;
+    display: flex; flex-direction: column;
+  }
+  #hud { border-radius: 0; border-left: 0; border-right: 0; border-top: 0; flex-shrink: 0; }
+  #canvas-wrap {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  #game-canvas { width: 100%; height: 100%; object-fit: fill; }
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  #game-shell {
+    width: 100dvh !important;
+    height: 100vw !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+}
