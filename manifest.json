@@ -1,0 +1,9 @@
+{
+  "name": "Didalmianos — Árvores de Arcano",
+  "short_name": "Didalmianos",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b131e",
+  "theme_color": "#0b131e"
+}

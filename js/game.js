@@ -780,9 +780,16 @@ window.Jogo.Game = (function () {
           .catch(() => {});
       }
     });
-    document.getElementById('btn-play').addEventListener('click', () => openChars('play'));
-    document.getElementById('btn-rpg').addEventListener('click', () => openChars('rpg'));
+    document.getElementById('btn-play').addEventListener('click', () => { enterFullscreen(); openChars('play'); });
+    document.getElementById('btn-rpg').addEventListener('click', () => { enterFullscreen(); openChars('rpg'); });
     document.getElementById('btn-rpg-pause').addEventListener('click', pauseGame);
+    document.getElementById('btn-rpg-fs').addEventListener('click', () => {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        enterFullscreen();
+      }
+    });
 
     // Dificuldade (Facil / Regular / Dificil)
     const diffBtns = document.querySelectorAll('.diff-btn');
@@ -828,6 +835,7 @@ window.Jogo.Game = (function () {
       screenTitle.classList.remove('hidden');
     });
     document.getElementById('btn-chars-confirm').addEventListener('click', () => {
+      enterFullscreen();
       screenChars.classList.add('hidden');
       if (pendingAction === 'play') loadStage(unlockedStage);
       else if (pendingAction === 'rpg') startRpg();
@@ -875,16 +883,16 @@ window.Jogo.Game = (function () {
       .catch(() => {});
   }
 
-  // Navegadores so permitem tela cheia apos um gesto do usuario:
-  // entra em tela cheia no primeiro clique/toque/tecla.
-  function autoFullscreenOnce() {
-    window.removeEventListener('pointerdown', autoFullscreenOnce, true);
-    window.removeEventListener('keydown', autoFullscreenOnce, true);
+  // Navegadores moveis (Chrome / Samsung Internet) exigem 'click' ou 'touchend' para tela cheia.
+  function autoFullscreenOnClick() {
     Audio.startMusic();
     enterFullscreen();
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      window.removeEventListener('click', autoFullscreenOnClick, true);
+    }
   }
-  window.addEventListener('pointerdown', autoFullscreenOnce, true);
-  window.addEventListener('keydown', autoFullscreenOnce, true);
+  window.addEventListener('click', autoFullscreenOnClick, true);
+  window.addEventListener('keydown', () => { Audio.startMusic(); }, { once: true });
 
   // Tecla F alterna tela cheia
   window.addEventListener('keydown', (e) => {

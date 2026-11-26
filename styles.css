@@ -736,3 +736,8 @@ body.rpg-mode .touch-controls .touch-dpad button { width: 62px; height: 62px; bo
     color: #fff;
   }
 }
+
+/* Botoes topo RPG (Pausa + Tela Cheia) */
+#rpg-top-btns { display: none; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 6; gap: 8px; }
+body.rpg-mode #rpg-top-btns { display: flex; }
+#rpg-top-btns #btn-rpg-pause, #rpg-top-btns #btn-rpg-fs { position: static; transform: none; display: block; width: 40px; height: 34px; opacity: 0.85; }

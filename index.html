@@ -6,8 +6,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b131e" />
+  <link rel="manifest" href="manifest.json" />
   <title>Nícolas, o Didalmiano — Crônicas das Árvores de Arcano</title>
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
   <div id="game-shell">
@@ -59,7 +60,10 @@
     <!-- Área Principal do Canvas -->
     <main id="canvas-wrap">
       <canvas id="game-canvas" width="960" height="540"></canvas>
-      <button id="btn-rpg-pause" class="icon-btn" title="Pausar (ESC)">⏸</button>
+      <div id="rpg-top-btns">
+        <button id="btn-rpg-pause" class="icon-btn" title="Pausar (ESC)">⏸</button>
+        <button id="btn-rpg-fs" class="icon-btn" title="Tela Cheia (F)">⛶</button>
+      </div>
 
       <!-- Tela Inicial -->
       <div id="screen-title" class="overlay-screen">
@@ -184,6 +188,6 @@
   <script src="js/entities.js?v=7" defer></script>
   <script src="js/rpg_world.js?v=8" defer></script>
   <script src="js/rpg.js?v=9" defer></script>
-  <script src="js/game.js?v=10" defer></script>
+  <script src="js/game.js?v=11" defer></script>
 </body>
 </html>
